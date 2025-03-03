@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Variants Management</title>
+  <style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f8f9fa;
+        margin: 0;
+        padding: 0;
+        height:100vh;
+    }
+
+    .container {
+        width: 90%;
+        margin: 20px auto;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+        text-align: center;
+        color: #333;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    th, td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    th {
+        background-color: #007bff;
+        color: white;
+    }
+
+    tr:hover {
+        background-color: #f1f1f1;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn {
+        padding: 8px 12px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        color: white;
+    }
+
+
+    .back-btn {
+    margin-left: 0px;
+    background-color: #6c757d;
+    color: white;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+.back-btn:hover {
+    background-color: #5a6268;
+}
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>🎨 Variants Management</h2>
+
+  <table>
+    <thead>
+    <tr>
+      <th>Variant ID</th>
+      <th>Variant Details</th>
+      <th>Image</th>
+    </tr>
+    </thead>
+    <tbody id="variantTableBody">
+    <tr th:each="variant: ${variants}">
+      <td th:text="${variant.uniqueId}"></td>
+      <td>
+        <div th:if="${variant.attribute != null}">
+          <span th:text="${variant.attribute}"></span>
+        </div>
+      </td>
+      <td>
+        <div th:if="${variant.imageData != null}">
+          <img th:src="${variant.imageData}" alt="Variant Image" style="width: 50px; height: 50px;">
+        </div>
+      </td>
+    </tr>
+    <button class="btn back-btn" onclick="goBack()">⬅️ Back</button>
+    </tbody>
+  </table>
+
+
+</div>
+
+<script>
+  function createVariant() {
+      alert("🆕 Adding New Variant (Implement Backend)");
+  }
+
+  function updateVariant(variantId) {
+      alert("✏️ Updating Variant ID: " + variantId);
+  }
+
+  function deleteVariant(variantId) {
+      if (confirm("⚠️ Are you sure you want to delete Variant ID: " + variantId + "?")) {
+          alert("🗑️ Deleting Variant ID: " + variantId);
+      }
+  }
+  function goBack() {
+      window.history.back();
+  }
+</script>
+
+</body>
+</html>

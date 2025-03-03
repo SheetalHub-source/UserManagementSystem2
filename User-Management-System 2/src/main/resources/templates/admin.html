@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin List</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #005f86;
+            color: white;
+        }
+        .container {
+            background-color: white;
+            color: black;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 800px;
+            margin: auto;
+            margin-top: 50px;
+        }
+        .admin-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #d63384;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .admin-btn:hover {
+            background-color: #c2185b;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            width: 50%;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .close {
+            float: right;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+        }
+        .btn {
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            width: 48%;
+        }
+        .btn-primary {
+            background-color: #d63384;
+            color: white;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        .error-message {
+    color: red;
+    font-size: 14px;
+    margin-top: 4px;
+    display: block;
+}
+
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2 class="text-center">Admin List</h2>
+
+    <!-- Search and Sort -->
+    <form class="d-flex flex-column mb-3">
+        <label for="searchByName">Search by Name:</label>
+        <input type="text" id="searchByName" class="form-control mb-2" placeholder="Enter Admin Name">
+
+        <label for="searchByEmail">Search by Email:</label>
+        <input type="text" id="searchByEmail" class="form-control mb-2" placeholder="Enter Email">
+
+        <label for="searchById">Search by Unique Key:</label>
+        <input type="text" id="searchById" class="form-control mb-2" placeholder="Enter Unique Key">
+
+        <div class="d-flex align-items-center">
+            <label for="sortBy" class="me-2">Sort By:</label>
+            <select id="sortBy" class="form-select w-25 me-2">
+                <option value="name">Name</option>
+                <option value="email">Email</option>
+                <option value="id">Id</option>
+            </select>
+
+            <label for="sortOrder" class="me-2">Order:</label>
+            <select id="sortOrder" class="form-select w-25 me-2">
+                <option value="asc">Asc</option>
+                <option value="desc">Desc</option>
+            </select>
+
+            <button type="button" class="btn btn-primary ms-2" onclick="searchAdmins()">Search</button>
+        </div>
+    </form>
+
+
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Admin Name</th>
+            <th>Email</th>
+            <th>Password</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody id="adminTable">
+        <tr th:each="user : ${users}">
+            <td th:text="${user.uniqueId}"></td>
+            <td th:text="${user.userName}"></td>
+            <td th:text="${user.email}"></td>
+            <td th:text="${user.password}"></td>
+            <td>
+                <button class="btn btn-danger btn-sm" th:attr="onclick='deleteAdmin(' + ${user.uniqueId} + ')'" >Delete</button>
+                <button class="btn btn-primary"
+                        th:attr="onclick=|openUpdateModal('${user.uniqueId}', '${user.userName}', '${user.email}', '${user.password}')|">
+                    Update
+                </button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- Update Admin Modal -->
+    <div id="updateAdminModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeUpdateModal()">&times;</span>
+            <h2>Update Admin</h2>
+            <form id="updateAdminForm">
+                <label for="adminId">Admin ID:</label>
+                <input type="text" id="adminId" name="adminId" readonly>
+
+                <label for="username">Admin Name:</label>
+                <input type="text" id="username" name="username">
+                <span class="error-message" id="usernameUpdateError" style="color: red;"></span>
+
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email">
+                <span class="error-message" id="emailUpdateError" style="color: red;"></span>
+
+                <label for="password">Password:</label>
+                <input type="text" id="password" name="password">
+                <span class="error-message" id="passwordUpdateError" style="color: red;"></span>
+
+                <label for="role">Role:</label>
+                <input type="text" id="role" name="role" value="Admin" readonly>
+
+                <div class="button-group">
+                    <button type="button" class="btn btn-secondary" onclick="closeUpdateModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="updateButton">Update Admin</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+
+    <!-- Create Admin Modal -->
+    <div id="createAdminModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeCreateModal()">&times;</span>
+            <h2>Create New Admin</h2>
+            <form id="createAdminForm">
+                <label for="newUsername">Admin Name:</label>
+                <input type="text" id="newUsername" name="username" required>
+                <span class="error-message" id="usernameError"></span>
+
+                <label for="newEmail">Email:</label>
+                <input type="email" id="newEmail" name="email" required>
+                <span class="error-message" id="emailError"></span>
+
+                <label for="newPassword">Password:</label>
+                <input type="password" id="newPassword" name="password" required>
+                <span class="error-message" id="passwordError"></span>
+
+                <label for="newRole">Role:</label>
+                <input type="text" id="newRole" name="role" value="Admin" readonly>
+                <span class="error-message" id="roleError"></span>
+
+                <div class="button-group">
+                    <button type="button" class="btn btn-secondary" onclick="closeCreateModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="createButton">Create Admin</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+
+    <!-- Pagination -->
+    <nav>
+        <ul class="pagination justify-content-center">
+            <li th:if="${currentPage > 0}" class="page-item">
+                <a class="page-link" th:href="@{/admin(page=${currentPage - 1})}">Previous</a>
+            </li>
+
+            <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}" class="page-item">
+                <a class="page-link" th:href="@{/admin(page=${i})}" th:text="${i + 1}"></a>
+            </li>
+
+            <li th:if="${currentPage < totalPages - 1}" class="page-item">
+                <a class="page-link" th:href="@{/admin(page=${currentPage + 1})}">Next</a>
+            </li>
+        </ul>
+    </nav>
+
+</div>
+
+<!-- Create Admin Button -->
+<button class="admin-btn" onclick="openCreateModal()">Create Admin</button>
+
+<script>
+    document.getElementById("createAdminForm").addEventListener("submit", function (event) {
+    event.preventDefault(); // Prevent default form submission
+
+    // Clear previous errors
+    document.querySelectorAll(".error-message").forEach(el => el.innerText = "");
+
+    const userData = {
+        userName: document.getElementById("newUsername").value,
+        email: document.getElementById("newEmail").value,
+        password: document.getElementById("newPassword").value,
+        role: document.getElementById("newRole").value
+    };
+
+
+
+    fetch("/api/admin", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(userData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.Message === "Validation Failed" && data.Error) {
+            // Loop through each error and append message instead of replacing
+            data.Error.forEach(error => {
+                if (error.toLowerCase().includes("invalid username") || error.toLowerCase().includes("user with same username")) {
+                    document.getElementById("usernameError").innerHTML += `<div>${error}</div>`;
+                }
+                if (error.toLowerCase().includes("email")) {
+                    document.getElementById("emailError").innerHTML += `<div>${error}</div>`;
+                }
+                if (error.toLowerCase().includes("password")) {
+                    document.getElementById("passwordError").innerHTML += `<div>${error}</div>`;
+                }
+                if (error.toLowerCase().includes("role")) {
+                    document.getElementById("roleError").innerHTML += `<div>${error}</div>`;
+                }
+            });
+        } else {
+            alert(data.message || "Admin created successfully!");
+            closeCreateModal();
+            window.location.reload();
+        }
+    })
+    .catch(error => console.error("Error:", error));
+});
+
+
+     function searchAdmins() {
+        const nameValue = document.getElementById("searchByName").value.trim();
+        const emailValue = document.getElementById("searchByEmail").value.trim();
+        const idValue = document.getElementById("searchById").value.trim();
+        const sortBy = document.getElementById("sortBy").value;
+        const sortOrder = document.getElementById("sortOrder").value;
+       let field = "uniqueId";
+
+if (sortBy === "name") {
+    field = "userName";
+} else if (sortBy === "email") {
+    field = "email";
+}
+
+   let queryParams = new URLSearchParams();
+
+    if (nameValue) queryParams.append("userName", nameValue);
+    if (emailValue) queryParams.append("email", emailValue);
+    if (idValue) queryParams.append("uniqueId", idValue);
+
+     queryParams.append("role","ADMIN");
+    // Sorting parameters
+    queryParams.append("field", field);
+    queryParams.append("order", sortOrder);
+        window.location.href = `/api/admin?${queryParams.toString()}`;
+
+    }
+
+
+     function openUpdateModal(id, name, email, password) {
+         document.getElementById('adminId').value = id;
+         document.getElementById('username').value = name;
+         document.getElementById('email').value = email;
+         document.getElementById('password').value = password;
+
+         document.getElementById('updateAdminModal').style.display = 'block';
+     }
+
+
+     document.getElementById("updateAdminForm").addEventListener("submit", function (event) {
+    event.preventDefault(); // Prevent default form submission
+
+    // Clear previous errors
+    document.querySelectorAll(".error-message").forEach(el => el.innerText = "");
+
+    // Collect data from form fields
+    const adminId = document.getElementById("adminId").value;
+    const username = document.getElementById("username").value;
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    // Prepare data object
+    const adminData = {
+        uniqueId: adminId,
+        userName: username,
+        email: email,
+        password: password,
+        role: "ADMIN"
+    };
+
+    fetch(`/api/admin`, {
+        method: "POST",  // Use PUT if your API expects it for updates
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(adminData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.Message === "Validation Failed" && data.Error) {
+            // Loop through each error and append message
+            data.Error.forEach(error => {
+                if (error.toLowerCase().includes("invalid username") || error.toLowerCase().includes("user with same username")) {
+                    document.getElementById("usernameUpdateError").innerHTML += `<div>${error}</div>`;
+                }
+                if (error.toLowerCase().includes("email")) {
+                    document.getElementById("emailUpdateError").innerHTML += `<div>${error}</div>`;
+                }
+                if (error.toLowerCase().includes("password")) {
+                    document.getElementById("passwordUpdateError").innerHTML += `<div>${error}</div>`;
+                }
+            });
+        } else {
+            alert(data.message || "Admin updated successfully!");
+            closeUpdateModal();
+            window.location.reload();
+        }
+    })
+    .catch(error => console.error("Error updating admin:", error));
+});
+
+     function closeUpdateModal() {
+         document.getElementById('updateAdminModal').style.display = 'none';
+     }
+
+
+     // Open Create Modal
+ function openCreateModal() {
+     document.getElementById("createAdminModal").style.display = "block";
+ }
+
+ // Close Create Modal
+ function closeCreateModal() {
+     document.getElementById("createAdminModal").style.display = "none";
+ }
+
+function deleteAdmin(uniqueId) {
+    if (!confirm("Are you sure you want to delete this admin?")) {
+        return; // Stop if user cancels
+    }
+
+    fetch(`/api/admin/${uniqueId}`, {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    })
+    .then(response => {
+        if (response.status === 204) {
+            // 204 No Content - No JSON body
+            return { status: response.status, body: { message: "Admin deleted successfully!" } };
+        }
+        return response.json().then(data => ({ status: response.status, body: data }));
+    })
+    .then(({ status, body }) => {
+        if (status >= 200 && status < 300) {
+            alert(body.message || "Admin deleted successfully!");
+            location.reload(); // Refresh page
+        } else {
+            alert(body.error || "Failed to delete admin.");
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        alert("An error occurred while deleting the admin.");
+    });
+}
+
+
+
+</script>
+
+</body>
+</html>

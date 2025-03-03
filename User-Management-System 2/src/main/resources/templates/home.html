@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home Page</title>
+  <style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        background-color: #f4f4f4;
+    }
+    .container {
+        max-width: 1200px;
+        margin: auto;
+        padding: 20px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .search-bar, .sort-options {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    .search-bar input, .sort-options select, .sort-options button {
+        padding: 8px;
+        font-size: 16px;
+    }
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
+    }
+    .product-card {
+        padding: 15px;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        text-align: center;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h2>Product List</h2>
+  <div class="search-bar">
+    <input type="text" id="search" placeholder="Search by name, category, variant...">
+  </div>
+  <div class="sort-options">
+    <select id="sortBy">
+      <option value="productName">Sort by Product Name</option>
+      <option value="price">Sort by Price</option>
+      <option value="createdAt">Sort by Created At</option>
+      <option value="updatedAt">Sort by Updated At</option>
+    </select>
+    <select id="order">
+      <option value="asc">Ascending</option>
+      <option value="desc">Descending</option>
+    </select>
+    <button onclick="fetchProducts()">Apply</button>
+  </div>
+  <div class="product-grid" id="productGrid">
+    <!-- Products will be dynamically added here -->
+  </div>
+</div>
+<script>
+  async function fetchProducts() {
+      const searchQuery = document.getElementById('search').value;
+      const sortBy = document.getElementById('sortBy').value;
+      const order = document.getElementById('order').value;
+
+      const response = await fetch(`http://localhost:8080/products?search=${searchQuery}&sortBy=${sortBy}&order=${order}`);
+      const products = await response.json();
+
+      const productGrid = document.getElementById('productGrid');
+      productGrid.innerHTML = '';
+
+      products.slice(0, 6).forEach(product => {
+          const productCard = document.createElement('div');
+          productCard.classList.add('product-card');
+          productCard.innerHTML = `
+              <h3>${product.productName}</h3>
+              <p>Category: ${product.category}</p>
+              <p>Price: $${product.price}</p>
+          `;
+          productGrid.appendChild(productCard);
+      });
+  }
+  document.getElementById('search').addEventListener('input', fetchProducts);
+</script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - E-Commerce</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+     font-family: 'Poppins', sans-serif;
+     display: flex;
+     justify-content: center;
+     align-items: center;
+     height: 100vh;
+     background: linear-gradient(to right, #4a90e2, #6bb9f0); /* Blue gradient */
+     margin: 0;
+ }
+
+ .login-container {
+     display: flex;
+     justify-content: center;
+     align-items: center;
+     height: 100%;
+ }
+
+ .login-box {
+     background: #fff;
+     padding: 30px;
+     border-radius: 10px;
+     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+     text-align: center;
+     width: 350px;
+ }
+
+ h2 {
+     margin-bottom: 10px;
+     font-weight: 600;
+ }
+
+ .subtitle {
+     color: #666;
+     font-size: 14px;
+     margin-bottom: 20px;
+ }
+
+ .input-group {
+     text-align: left;
+     margin-bottom: 15px;
+ }
+
+ .input-group label {
+     font-weight: 500;
+     display: block;
+     margin-bottom: 5px;
+ }
+
+ input {
+     width: 100%;
+     padding: 10px;
+     border: 1px solid #ccc;
+     border-radius: 5px;
+     font-size: 14px;
+ }
+
+ .btn {
+     width: 100%;
+     background: #4a90e2; /* Blue button */
+     color: white;
+     border: none;
+     padding: 12px;
+     font-size: 16px;
+     border-radius: 5px;
+     cursor: pointer;
+     margin-top: 10px;
+     transition: background 0.3s ease;
+ }
+
+ .btn:hover {
+     background: #3b7dc4; /* Darker blue on hover */
+ }
+
+ .register-text {
+     margin-top: 15px;
+     font-size: 14px;
+ }
+
+ .register-text a {
+     color: #4a90e2; /* Blue link */
+     text-decoration: none;
+     font-weight: 500;
+ }
+
+ .register-text a:hover {
+     text-decoration: underline;
+ }
+    </style>
+</head>
+<body>
+<div class="login-container">
+    <div class="login-box">
+        <h2>Welcome Back!</h2>
+        <p class="subtitle">Login to continue shopping</p>
+        <form id="loginForm">
+            <div class="input-group">
+                <label for="username">Email</label>
+                <input type="email" id="username" name="username" placeholder="Enter your email" required>
+            </div>
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+            </div>
+            <p id="error-message" style="color: red; display: none;"></p> <!-- Error message div -->
+            <button type="submit" class="btn">Login</button>
+        </form>
+        <p class="register-text">Don't have an account? Register here</p>
+    </div>
+</div>
+
+<script>
+    document.getElementById("loginForm").addEventListener("submit", async function(event) {
+        event.preventDefault();
+
+        let username = document.getElementById("username").value;
+        let password = document.getElementById("password").value;
+    let errorMessage = document.getElementById("error-message"); // Error message element
+
+        let response = await fetch("http://localhost:8080/login", {
+            method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" }
+            body: new URLSearchParams({ username, password })
+        });
+
+        if (response.ok) {
+            alert("Login Successful!");
+            window.location.href = "/dashboard";  // Redirect to dashboard after successful login
+        } else {
+        let errorText = await response.text();
+        errorMessage.innerText = errorText;
+        errorMessage.style.display = "block";        }
+    });
+</script>
+
+</body>
+</html>

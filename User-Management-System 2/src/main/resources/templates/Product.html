@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 90%;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+.search-bar input,
+.search-bar select,
+.search-bar button {
+    border: 1px solid #ccc !important; /* Ensures border is applied */
+    padding: 8px;
+    border-radius: 5px;
+    background-color: white;
+    color: black;
+    font-size: 14px;
+}
+
+.search-bar input::placeholder {
+    color: #888; /* Light gray color for placeholder */
+}
+
+.search-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+}
+
+.create-btn {
+    padding: 10px 15px;
+    background-color: #28a745;
+    color: white;
+    border: 1px solid #28a745;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.create-btn:hover {
+    background-color: #218838;
+}
+
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+        }
+
+        .update-btn {
+            background-color: #ffc107;
+        }
+
+        .update-btn:hover {
+            background-color: #e0a800;
+        }
+
+        .delete-btn {
+            background-color: #dc3545;
+        }
+
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+
+        .variant-btn {
+            background-color: #17a2b8;
+        }
+
+        .variant-btn:hover {
+            background-color: #138496;
+        }
+        .pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.pagination button {
+    padding: 8px 12px;
+    margin: 0 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #007bff;
+    color: white;
+}
+
+.pagination button:hover {
+    background-color: #0056b3;
+}
+
+.pagination .active {
+    background-color: #28a745;
+}
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>📦 Product Management</h2>
+    <!-- Top Bar with Search and Create Product Button -->
+    <div class="top-bar">
+        <div class="search-bar">
+            <input type="text" id="searchProductName" placeholder="Search by Product Name...">
+            <input type="number" id="searchProductId" placeholder="Search by Product ID...">
+            <label for="sortBy">Sort By:</label>
+            <select id="sortBy" name="sortBy">
+                <option value="uniqueProductId">Product Id</option>
+                <option value="price">price</option>
+                <option value="updatedAt">Updation date</option>
+                <option value="productName">Product Name</option>
+            </select>
+            <label for="order">Order:</label>
+            <select id="order" name="order">
+                <option value="asc">Ascending</option>
+                <option value="desc">Descending</option>
+            </select>
+            <select id="searchCategory">
+                <option value="">Select Category</option>
+                <!-- Iterate through the categories list dynamically -->
+                <option th:each="category : ${categories}"
+                        th:value="${category.categoryName}"
+                th:text="${category.categoryName}">
+                </option>
+            </select>
+            <br>
+            <input type="number" id="searchPriceMin" placeholder="Min Price">
+            <input type="number" id="searchPriceMax" placeholder="Max Price">
+
+            <label for="pageNumber">Page Number:</label>
+            <input type="number" id="pageNumber" placeholder="Page Number" min="1" name="pageNumber">
+            <label for="pageSize">Page Size:</label>
+            <input type="number" id="pageSize" placeholder="Page Size" min="1" value="10" name="pageSize">
+            <button onclick="searchProducts()">Search</button>
+        </div>
+        <button class="create-btn" onclick="openForm()">  + Create Product</button>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Product ID</th>
+            <th>Product Name</th>
+            <th>Product Description</th>
+            <th>Price (₹)</th>
+            <th>Category</th>
+            <th>Creation Date</th>
+            <th>Updation Date</th>
+            <th>Product Image</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="product : ${products}">
+            <td th:text="${product.uniqueProductId}"></td>
+            <td th:text="${product.productName}"></td>
+            <td th:text="${product.productDesc}"></td>
+            <td th:text="${product.price}"></td>
+            <td th:text="${product.categoryName}"></td>
+            <td th:text="${#temporals.format(product.createdAt, 'dd-MM-yyyy HH:mm')}"></td>  <!-- ✅ Date Format -->
+            <td th:text="${#temporals.format(product.updatedAt, 'dd-MM-yyyy HH:mm')}"></td>  <!-- ✅ Date Format -->
+            <td>
+                <img th:src="${product.productImage}" alt="Product Image" width="80" height="80">
+            </td>
+            <td class="action-buttons">
+
+                <button class="btn update-btn">
+                    <a th:href="@{/product/{id}(id=${product.uniqueProductId})}">Update</a>
+                </button>
+
+                <button class="btn delete-btn"
+                        th:attr="onclick='deleteProduct(' + ${product.uniqueProductId} + ')'" >
+                    Delete
+                </button>
+                <a th:href="@{/variants/{id}(id=${product.id})}" class="btn variant-btn">View Variants</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <div class="pagination">
+        <!-- Previous Button -->
+        <button th:if="${currentPage > 0}"
+                th:data-page="${currentPage - 1}"
+                th:data-size="${pageSize}"
+                th:data-field="${sortField}"
+                th:data-order="${sortDirection}"
+                onclick="goToPage(this)">
+            Previous
+        </button>
+
+        <!-- Page Numbers -->
+        <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+            <button th:text="${i}"
+                    th:classappend="${i == currentPage} ? 'active'"
+                    th:data-page="${i}"
+                    th:data-size="${pageSize}"
+                    th:data-field="${sortField}"
+                    th:data-order="${sortDirection}"
+                    onclick="goToPage(this)">
+            </button>
+        </th:block>
+
+        <!-- Next Button -->
+        <button th:if="${currentPage < totalPages - 1}"
+                th:data-page="${currentPage + 1}"
+                th:data-size="${pageSize}"
+                th:data-field="${sortField}"
+                th:data-order="${sortDirection}"
+                onclick="goToPage(this)">
+            Next
+        </button>
+    </div>
+
+</div>
+
+
+<!-- Create Product Modal -->
+<div id="createProductModal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div class="flex justify-between items-center">
+            <h3 class="text-xl font-semibold text-gray-700">Create Product</h3>
+            <span class="cursor-pointer text-gray-600 hover:text-gray-800 text-2xl" onclick="closeForm()">&times;</span>
+        </div>
+
+        <form id="createProductForm" th:action="@{/product}" method="post" enctype="multipart/form-data" class="mt-4">
+            <!-- Hidden Input for JSON Data -->
+            <input type="hidden" id="productRequestField" name="productRequestField">
+            <label for="productName" class="block text-gray-600 text-sm font-semibold">Product Name:</label>
+            <input type="text" id="productName" name="productName" class="w-full border border-gray-300 p-2 rounded-md focus:ring focus:ring-blue-300 focus:border-blue-500" required>
+
+            <label for="productDesc" class="block text-gray-600 text-sm font-semibold mt-3">Product Description:</label>
+            <textarea id="productDesc" name="productDesc" class="w-full border border-gray-300 p-2 rounded-md focus:ring focus:ring-blue-300 focus:border-blue-500" required></textarea>
+
+            <label for="price" class="block text-gray-600 text-sm font-semibold mt-3">Price (₹):</label>
+            <input type="number" id="price" name="price" min="1" class="w-full border border-gray-300 p-2 rounded-md focus:ring focus:ring-blue-300 focus:border-blue-500" required>
+
+
+            <label for="categoryName" class="block text-gray-600 text-sm font-semibold mt-3">Category:</label>
+            <select id="categoryName" name="categoryName" class="w-full border border-gray-300 p-2 rounded-md focus:ring focus:ring-blue-300 focus:border-blue-500" required>
+                <option value="">Select Category</option>
+                <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.categoryName}"></option>
+            </select>
+
+            <label for="productImage" class="block text-gray-600 text-sm font-semibold mt-3">Product Image:</label>
+            <input type="file" id="productImage" name="productImage" accept="image/*" class="w-full border border-gray-300 p-2 rounded-md focus:ring focus:ring-blue-300 focus:border-blue-500" required>
+
+            <!-- Add Variant Button -->
+            <button type="button" onclick="addVariant()" class="w-full mt-4 bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition">
+                + Add Variant
+            </button>
+
+            <!-- Variants Container (Dynamic Forms Will Be Added Here) -->
+            <div id="variantsContainer" class="mt-4"></div>
+
+            <button type="submit" class="w-full mt-4 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">
+                Create Product
+            </button>
+
+        </form>
+    </div>
+</div>
+
+
+
+
+
+<script>
+    function goToPage(button) {
+     let page = button.getAttribute("data-page");
+     let size = button.getAttribute("data-size");
+     let field = button.getAttribute("data-field");
+     let order = button.getAttribute("data-order");
+
+     window.location.href = `?page=${page}&size=${size}&field=${field}&orderBy=${order}`;
+ }
+
+ //Search Products
+function searchProducts() {
+        let productName = document.getElementById("searchProductName").value;
+        let productId = document.getElementById("searchProductId").value;
+        let sortBy = document.getElementById("sortBy").value;
+        let order = document.getElementById("order").value;
+        let category = document.getElementById("searchCategory").value;
+        let minPrice = document.getElementById("searchPriceMin").value;
+        let maxPrice = document.getElementById("searchPriceMax").value;
+        let pageNumber = document.getElementById("pageNumber").value;
+        let pageSize = document.getElementById("pageSize").value;
+
+        let queryParams = new URLSearchParams();
+
+        if (productName) queryParams.append("productName", productName);
+        if (productId) queryParams.append("uniqueProductId", productId);
+        if (sortBy) queryParams.append("field", sortBy);
+        if (order) queryParams.append("orderBy", order);
+        if (category) queryParams.append("categoryName", category);
+        if (minPrice) queryParams.append("minPrice", minPrice);
+        if (maxPrice)  queryParams.append("maxPrice", maxPrice);
+        if (pageNumber) queryParams.append("page", pageNumber);
+        if (pageSize) queryParams.append("size", pageSize);
+
+        window.location.href =  `/product?${queryParams.toString()}`;
+    }
+
+
+//Create Products
+
+function openForm() {
+        document.getElementById("createProductModal").classList.remove("hidden");
+    }
+
+    function closeForm() {
+        document.getElementById("createProductModal").classList.add("hidden");
+    }
+
+    window.onclick = function(event) {
+        let modal = document.getElementById("createProductModal");
+        if (event.target === modal) {
+            closeForm();
+        }
+    }
+function addVariant() {
+    const variantContainer = document.getElementById("variantsContainer");
+
+    // Remove the previous "Add Variant" button (if exists)
+    const lastButton = variantContainer.querySelector(".add-variant-btn");
+    if (lastButton) {
+        lastButton.remove();
+    }
+
+    // Create a new variant form
+    const variantForm = document.createElement("div");
+    variantForm.classList.add("mt-4", "p-4", "border", "border-gray-300", "rounded-md", "bg-gray-100");
+
+    variantForm.innerHTML = `
+        <label class="block text-gray-600 text-sm font-semibold mt-3">Variant Details:</label>
+        <div class="variant-attributes">
+            <div class="option-group flex space-x-2 mt-2">
+                <input type="text" name="optionName[]" placeholder="Enter option"
+                    class="border border-gray-300 p-2 rounded-md w-1/2 focus:ring focus:ring-blue-300 focus:border-blue-500" required>
+                <input type="text" name="optionValue[]" placeholder="Enter value"
+                    class="border border-gray-300 p-2 rounded-md w-1/2 focus:ring focus:ring-blue-300 focus:border-blue-500" required>
+            </div>
+        </div>
+
+        <button type="button" class="add-attribute-btn bg-blue-500 text-white px-3 py-1 rounded-md mt-2">
+            + Add Attribute
+        </button>
+
+        <label class="block text-gray-600 text-sm font-semibold mt-3">Variant Image:</label>
+        <input type="file" id="variantImages" name="variantImage[]" accept="image/*" class="w-full border border-gray-300 p-2 rounded-md focus:ring focus:ring-blue-300 focus:border-blue-500" required>
+
+        <div class="flex space-x-2 mt-3">
+            <button type="button" onclick="removeVariant(this)" class="bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition">
+                Remove Variant
+            </button>
+        </div>
+    `;
+
+    // Append the new variant form
+    variantContainer.appendChild(variantForm);
+
+    // Add dynamic attribute functionality
+    const addAttributeBtn = variantForm.querySelector(".add-attribute-btn");
+    addAttributeBtn.addEventListener("click", function () {
+        addAttributeField(variantForm.querySelector(".variant-attributes"));
+    });
+
+    // Add "Add Variant" button only to the last variant
+    const addButton = document.createElement("button");
+    addButton.type = "button";
+    addButton.className = "add-variant-btn bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition mt-3";
+    addButton.textContent = "+ Add Variant";
+    addButton.onclick = addVariant;
+
+    variantContainer.appendChild(addButton);
+}
+
+// Function to add option-value fields dynamically
+function addAttributeField(container) {
+    const optionGroup = document.createElement("div");
+    optionGroup.className = "option-group flex space-x-2 mt-2";
+
+    const optionInput = document.createElement("input");
+    optionInput.type = "text";
+    optionInput.name = "optionName[]";
+    optionInput.placeholder = "Enter option";
+    optionInput.className = "border border-gray-300 p-2 rounded-md w-1/2 focus:ring focus:ring-blue-300 focus:border-blue-500";
+    optionInput.required = true;
+
+    const valueInput = document.createElement("input");
+    valueInput.type = "text";
+    valueInput.name = "optionValue[]";
+    valueInput.placeholder = "Enter value";
+    valueInput.className = "border border-gray-300 p-2 rounded-md w-1/2 focus:ring focus:ring-blue-300 focus:border-blue-500";
+    valueInput.required = true;
+
+    optionGroup.appendChild(optionInput);
+    optionGroup.appendChild(valueInput);
+    container.appendChild(optionGroup);
+}
+
+// Function to remove a variant form
+function removeVariant(button) {
+    const variantContainer = document.getElementById("variantsContainer");
+    button.parentElement.parentElement.remove();
+
+    // Ensure "Add Variant" button is present at the last variant
+    if (!document.querySelector(".add-variant-btn")) {
+        const addButton = document.createElement("button");
+        addButton.type = "button";
+        addButton.className = "add-variant-btn bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition mt-3";
+        addButton.textContent = "+ Add Variant";
+        addButton.onclick = addVariant;
+
+        variantContainer.appendChild(addButton);
+    }
+}
+
+function getFormData() {
+    const formData = {
+        productName: document.getElementById("productName").value,
+        productDesc: document.getElementById("productDesc").value,
+        price: document.getElementById("price").value,
+        categoryId: document.getElementById("categoryName").value,
+        variantSet: []
+    };
+
+    // Debugging log to check if variants exist
+    console.log("Found Variant Groups:", document.querySelectorAll(".variant-attributes"));
+
+    // Extract Variants
+    document.querySelectorAll(".variant-attributes").forEach(variantDiv => {
+        let variant = { optionsData: [] };
+
+        variantDiv.querySelectorAll(".option-group").forEach(optionDiv => {
+            let optionName = optionDiv.querySelector("[name='optionName[]']").value;
+            let optionValue = optionDiv.querySelector("[name='optionValue[]']").value;
+
+            // Push extracted optionName and optionValue
+            if (optionName && optionValue) {
+                variant.optionsData.push({ option: optionName, value: optionValue });
+            }
+        });
+
+        // Only push variants that have options
+        if (variant.optionsData.length > 0) {
+            formData.variantSet.push(variant);
+        }
+    });
+
+    console.log("Final Form Data:", formData);
+    return formData;
+}
+// Send Data to Controller
+function submitForm(event) {
+    event.preventDefault(); // Default submit rokna zaroori hai
+
+    const formDataObject = getFormData(); // JSON object le lo
+
+    const formData = new FormData();
+    formData.append("productRequestField", JSON.stringify(formDataObject));
+
+    // Product Image append karo
+    const productImage = document.getElementById("productImage").files[0];
+    if (productImage) {
+        formData.append("productImage", productImage);
+    }
+
+     // Append Variant Images (loop through all variant image inputs)
+    const variantImagesInputs = document.querySelectorAll('input[name="variantImage[]"]');
+    variantImagesInputs.forEach(input => {
+        if (input.files.length > 0) {
+            for (let i = 0; i < input.files.length; i++) {
+                formData.append("variantImage", input.files[i]); // Append each image
+            }
+        }
+    });
+
+
+
+    // Backend request bhejo
+    fetch("/product", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Response:", data);
+        alert("Product Created Successfully!"); // Success message
+        closeForm(); // Modal close function
+    })
+    .catch(error => console.error("Error:", error));
+}
+    document.getElementById("createProductForm").addEventListener("submit", submitForm);
+
+
+    function openProductUpdateModal(uniqueProductId, productName, productDesc, price, categoryId, variantsJson) {
+    document.getElementById("modalUpdateProduct").classList.remove("hidden");
+
+    // Fill product details
+    document.getElementById("fieldProductId").value = productId;
+    document.getElementById("fieldProductName").value = productName;
+    document.getElementById("fieldProductDesc").value = productDesc;
+    document.getElementById("fieldProductPrice").value = productPrice;
+    document.getElementById("fieldCategoryName").value = categoryId;
+
+    // Clear existing variants
+    document.getElementById("containerVariants").innerHTML = "";
+
+    // Convert JSON string to object
+    let variants = JSON.parse(variantsJson);
+
+    // Populate variants
+    variants.forEach(variant => {
+        addProductVariant(variant);
+    });
+}
+
+// Function to add a new variant dynamically
+function addProductVariant(existingVariant = null) {
+    let containerVariants = document.getElementById("containerVariants");
+    let variantIndex = document.querySelectorAll(".variant").length; // Unique index for each variant
+
+    let variantDiv = document.createElement("div");
+    variantDiv.classList.add("variant", "border", "p-3", "rounded-md", "mt-2");
+    variantDiv.innerHTML = `
+        <input type="hidden" name="variants[${variantIndex}].variantId" value="${existingVariant ? existingVariant.id : ''}">
+
+        <label class="block text-gray-600 text-sm font-semibold">Variant Name:</label>
+        <input type="text" name="variants[${variantIndex}].name" class="w-full border border-gray-300 p-2 rounded-md" value="${existingVariant ? existingVariant.name : ''}" required>
+
+        <label class="block text-gray-600 text-sm font-semibold mt-2">Variant Price (₹):</label>
+        <input type="number" name="variants[${variantIndex}].price" class="w-full border border-gray-300 p-2 rounded-md" value="${existingVariant ? existingVariant.price : ''}" required>
+
+        <button type="button" onclick="removeProductVariant(this)" class="mt-2 bg-red-500 text-white py-1 px-3 rounded-md hover:bg-red-600 transition">
+            Remove
+        </button>
+    `;
+    containerVariants.appendChild(variantDiv);
+}
+
+// Function to remove a variant
+function removeProductVariant(button) {
+    button.parentElement.remove();
+}
+
+// Function to close the update modal
+function closeProductUpdateModal() {
+    document.getElementById("modalUpdateProduct").classList.add("hidden");
+}
+
+    function updateProducts(uniqueProductId) {
+    // Making the GET request to the controller with the uniqueProductId
+    fetch(`/product/${uniqueProductId}`)
+        .then(response => response.json())  // Assuming the response is in JSON format
+        .then(data => {
+            console.log('Product Data:', data);
+            // You can handle the response here
+        })
+        .catch(error => {
+            console.error('Error fetching product details:', error);
+        });
+}
+
+    function deleteProduct(uniqueProductId) {
+    fetch(`/product/${uniqueProductId}`, {
+        method: 'DELETE',
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Product deleted:', data);
+
+        // Show an alert box with the success message
+        alert(`Product with ID ${uniqueProductId} deleted successfully.`);
+
+        // Reload the current page after showing the alert
+        location.reload();  // This reloads the page
+    })
+    .catch(error => {
+        console.error('Error deleting product:', error);
+    });
+}
+
+
+
+</script>
+<script src="https://cdn.tailwindcss.com"></script>
+
+</body>
+</html>

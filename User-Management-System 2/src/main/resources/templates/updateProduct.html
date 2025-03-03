@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Product</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #555;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            resize: vertical;
+            height: 100px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            margin: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #variantContainer {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .variant-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .variant-row label {
+            width: 80px;
+        }
+
+        .variant-row input {
+            flex: 1;
+        }
+
+        .variant-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        #variantImg {
+            max-width: 150px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 10px;
+            display: block;
+        }
+        #productImagePreview{
+            max-width: 250px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 10px;
+            display: block;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h3>Update Product</h3>
+
+    <form id="productForm" action="/product" method="post" enctype="multipart/form-data">
+        <input type="hidden" id="productData" name="productData" th:value="${product.uniqueProductId}">
+
+        <label for="name">Product Name:</label>
+        <input type="text" id="name" name="name" th:value="${product.productName}" required>
+
+        <label for="desc">Product Description:</label>
+        <textarea id="desc" name="desc" th:text="${product.productDesc}" required></textarea>
+
+        <label for="price">Price (₹):</label>
+        <input type="number" id="price" name="price" th:value="${product.price}" min="1" required>
+
+        <label for="categorySelect">Category:</label>
+        <select name="category" id="categorySelect">
+            <option th:each="category : ${categories}"
+                    th:value="${category.id}"
+                    th:text="${category.categoryName}"
+                    th:selected="${category.categoryName == product.categoryName}">
+            </option>
+        </select>
+
+        <label for="image">Product Image:</label>
+        <div id="imagePreview">
+            <img th:src="${product.productImage}" alt="Product Image" id="productImagePreview">
+        </div>
+        <input type="file" id="image" name="image" accept="image/*">
+        <input type="hidden" id="productImageHidden" name="existingProductImage" th:value="${product.productImage}">
+
+
+        <h3>Variant Details:</h3>
+        <div id="variantsContainer">
+            <div th:each="variant, iterStat : ${variants}" class="variant-block">
+                <input type="hidden" id="variantData" name="variantData" th:value="${variant.uniqueId}">
+
+                <div id="variantContainer">
+                    <h3>Variant <span th:text="${iterStat.count}"></span></h3>
+
+                        <div th:each="attr : ${variantAttributesMap[variant.uniqueId]}" class="variant-row">
+                        <label>Option:</label>
+                        <input type="text" name="optionName[]" placeholder="Enter option" th:value="${attr.option}" required>
+
+                        <label>Value:</label>
+                        <input type="text" name="optionValue[]" placeholder="Enter value" th:value="${attr.value}" required>
+                    </div>
+
+                    <div>
+                        <img id="variantImg" th:if="${variant.imageData}" th:src="@{${variant.imageData}}" alt="Variant Image">
+                    </div>
+
+                    <input type="file" name="variantImage" accept="image/*">
+
+                    <input type="hidden" id="variantImageHidden" name="existingVariantImage" th:value="${variant.imageData}">
+
+                    <div class="variant-actions">
+                        <button type="button" onclick="addAttribute(this)">+ Add Attribute</button>
+                        <button type="button" onclick="removeVariant(this)" th:data-id="${variant.uniqueId}">Remove Variant</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button type="button" id="addVariantBtn">+ Add Variant</button>
+        <button type="submit">Update Product</button>
+
+        <button type="button" onclick="goBack()">Back</button>
+    </form>
+</div>
+
+<script>
+    function goBack() {
+        window.history.back();
+    }
+    document.getElementById("productForm").addEventListener("submit", async function (event) {
+    event.preventDefault(); // Prevent default form submission
+
+    let productData = {
+        uniqueProductId: document.getElementById("productData").value,
+        productName: document.getElementById("name").value,
+        productDesc: document.getElementById("desc").value,
+        price: document.getElementById("price").value,
+        categoryId: document.getElementById("categorySelect").value,
+        variantSet: []
+    };
+
+    let variantBlocks = document.querySelectorAll(".variant-block");
+    for (let index = 0; index < variantBlocks.length; index++) {
+        let variant = variantBlocks[index];
+        let variantData = { optionsData: [] };
+        let variantDataElement = variant.querySelector("input[name='variantData']");
+
+        variantData.uniqueId = variantDataElement ? variantDataElement.value : null;
+
+        let optionNames = variant.querySelectorAll("input[name='optionName[]']");
+        let optionValues = variant.querySelectorAll("input[name='optionValue[]']");
+
+        optionNames.forEach((option, i) => {
+            variantData.optionsData.push({
+                option: option.value,
+                value: optionValues[i].value
+            });
+        });
+
+        productData.variantSet.push(variantData);
+    }
+
+    let formData = new FormData();
+    formData.append("productRequestField", JSON.stringify(productData));
+
+let productImageInput = document.querySelector("input[name='image']");
+let existingProductImageInput = document.querySelector("input[name='existingProductImage']");
+
+let productImage = productImageInput && productImageInput.files.length > 0 ? productImageInput.files[0] : null;
+let existingProductImage = existingProductImageInput ? existingProductImageInput.value : null;
+
+console.log("Product Image is "+productImage)
+if (productImage) {
+    formData.append("productImage", productImage);  // Send the uploaded file
+    console.log("New Product Image is set:", productImage);
+} else if (existingProductImage) {
+ try {
+     const response = await fetch(existingProductImage);
+            const blob = await response.blob();
+            const file = new File([blob], "existingProductImage.jpg", { type: "image/jpeg" });
+            formData.append("productImage", file);  // Append this file as the 'productImage'
+            console.log("Old Product Image (as File) is set:", file);
+        } catch (error) {
+            console.error("❌ Error fetching existing product image:", error);
+        }
+}
+
+
+    for (let index = 0; index < variantBlocks.length; index++) {
+        let variant = variantBlocks[index];
+        let variantFileInput = variant.querySelector("input[name='variantImage']");
+        let variantHiddenInput = variant.querySelector("input[name='existingVariantImage']");
+
+        let variantFile = variantFileInput?.files[0];
+        let existingVariantImage = variantHiddenInput?.value;
+
+        if (variantFile) {
+            console.log(`✅ Variant ${index}: Adding New Image.`);
+            formData.append("variantImage", variantFile); // ✅ Correct way for MultipartFile[]
+        } else if (existingVariantImage) {
+            console.log(`✅ Variant ${index}: Fetching Existing Image...`);
+            try {
+                let response = await fetch(existingVariantImage);
+                let blob = await response.blob();
+                let file = new File([blob], `variant-${index}.jpg`, { type: "image/jpeg" });
+                formData.append("variantImage", file); // ✅ Same key to match MultipartFile[]
+            } catch (error) {
+                console.error(`❌ Error fetching variant image ${index}:`, error);
+            }
+        }
+    }
+
+    console.log("📜 Full FormData:", [...formData.entries()]);
+
+    fetch("/product", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("✅ Product Updated Successfully:", data);
+        alert("Product Updated Successfully!");
+    })
+    .catch(error => console.error("❌ Error:", error));
+});
+
+function addVariant() {
+    const variantsContainer = document.getElementById("variantsContainer");
+    const variantHTML = `
+        <div class="variant-block">
+            <div id="variantContainer">
+                <h3>New Variant</h3>
+                <div class="variant-row">
+                    <label>Option:</label>
+                    <input type="text" name="optionName[]" placeholder="Enter option" required>
+                    <label>Value:</label>
+                    <input type="text" name="optionValue[]" placeholder="Enter value" required>
+                </div>
+                <div>
+                    <img id="variantImg" src="" alt="Variant Image" style="display:none;">
+                </div>
+                <input type="file" name="variantImage" accept="image/*">
+                <div class="variant-actions">
+                    <button type="button" onclick="addAttribute(this)">+ Add Attribute</button>
+                    <button type="button" onclick="removeVariant(this)">Remove Variant</button>
+                </div>
+            </div>
+        </div>
+    `;
+    variantsContainer.insertAdjacentHTML("beforeend", variantHTML);
+}
+
+document.getElementById("addVariantBtn").addEventListener("click", addVariant);
+
+function removeVariant(button) {
+    const variantId = button.getAttribute("data-id"); // Get the variant ID from the button's data-id attribute
+
+    // Extract the uniqueProductId from the page URL (path)
+    const pathname = window.location.pathname;
+    const uniqueProductId = pathname.split('/')[2]; // This assumes the URL is like /product/{uniqueProductId}
+
+    if (!uniqueProductId) {
+        alert("❌ Product ID not found in the URL.");
+        return;
+    }
+
+    if (confirm("⚠️ Are you sure you want to delete Variant ID: " + variantId + "?")) {
+        // Make a DELETE request to the server
+        fetch(`/product/${uniqueProductId}/${variantId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                // You can add authorization headers if needed, e.g., 'Authorization': 'Bearer token'
+            },
+        })
+        .then(response => {
+            if (response.ok) {
+                alert("🗑️ Variant ID " + variantId + " deleted successfully!");
+                button.closest('.variant-block').remove(); // Remove the variant from the DOM
+            } else {
+                alert("❌ Failed to delete Variant ID " + variantId);
+            }
+        })
+        .catch(error => {
+            console.error('Error deleting variant:', error);
+            alert("❌ Error deleting Variant ID " + variantId);
+        });
+    }
+}
+
+
+    function addAttribute(button) {
+        const variantContainer = button.closest("#variantContainer");
+        const attributeHTML = `
+<div class="variant-row">
+<label>Option:</label>
+<input type="text" name="optionName[]" placeholder="Enter option" required>
+
+                <label>Value:</label>
+<input type="text" name="optionValue[]" placeholder="Enter value" required>
+</div>
+        `;
+        variantContainer.insertAdjacentHTML("beforeend", attributeHTML);
+    }
+
+
+
+
+</script>
+
+</body>
+</html>
