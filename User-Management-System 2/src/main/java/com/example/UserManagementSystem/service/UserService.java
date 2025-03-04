@@ -180,5 +180,9 @@ public class UserService {
         return "Admin deleted successfully.";
     }
 
+    public Users findByEmail(String email){
+       return userRepo.findByEmail(email).get();
+    }
+
 }
 

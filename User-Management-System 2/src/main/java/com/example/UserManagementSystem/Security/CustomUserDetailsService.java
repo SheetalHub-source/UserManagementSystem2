@@ -23,7 +23,7 @@ public class CustomUserDetailsService implements UserDetailsService {
       return User.builder()
               .username(user.getEmail())
               .password(user.getPassword())
-              .authorities("ROLE_" + user.getRole().toUpperCase())
+              .authorities(user.getRole().toUpperCase())//"ROLE_" +
               .build();
     }
 }

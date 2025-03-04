@@ -60,5 +60,13 @@ public class MainController {
         System.out.println("Controller method is called!");
         return "home";
     }
+    @GetMapping("/admin-dashboard")
+    public String adminDash(){
+        return "adminDashboard";
+    }
+    @GetMapping("/superadmin-dashboard")
+    public String superadminDash(){
+        return "Superadmin";
+    }
 
 }

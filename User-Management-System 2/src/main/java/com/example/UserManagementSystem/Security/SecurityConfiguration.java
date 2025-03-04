@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -33,17 +32,16 @@ public class SecurityConfiguration {
         httpSecurity
                 .csrf(csrf -> csrf.disable())  // CSRF disabled since JWT is stateless
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/signup", "/failed", "/loginpage").permitAll()
-                        .requestMatchers("/api/admin/**").hasRole("SUPERADMIN")
-                        .requestMatchers("/product/**", "/api/category/**").hasAnyRole("SUPERADMIN", "ADMIN")
-                        .requestMatchers("/api/product/**").hasAnyRole("SUPERADMIN", "ADMIN")
-                        .requestMatchers("/", "/home", "/index").permitAll()
+                        .requestMatchers("/login", "/signup", "/failed", "/loginpage","/", "/home", "/index","/category/**").permitAll()
+                        .requestMatchers("/api/admin/**","/superadmin-dashboard").hasRole("SUPERADMIN")
+                        .requestMatchers("/product/**").hasAnyRole("SUPERADMIN", "ADMIN")
+                        .requestMatchers("/admin-dashboard").hasRole("ADMIN")
                         .requestMatchers("/verify").authenticated()
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
                         .loginPage("/loginpage") // Custom login page
-                        .defaultSuccessUrl("/home", true) // Redirect after successful login
+                        .defaultSuccessUrl("/", true) // Redirect after successful login
                         .permitAll())
                 .logout(logout -> logout
                 .logoutUrl("/logout")

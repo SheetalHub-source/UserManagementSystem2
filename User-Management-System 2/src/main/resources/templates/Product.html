@@ -634,6 +634,25 @@ function closeProductUpdateModal() {
     });
 }
 
+ document.addEventListener("DOMContentLoaded", async () => {
+    try {
+        let response = await fetch("http://localhost:8080/product", {
+            method: "GET",
+            credentials: "include", // ✅ JWT Cookie automatically send hoga
+        });
+
+        if (response.status === 401) {
+            console.log("🚫 Unauthorized! Redirecting to Login...");
+            window.location.href = "/login";
+        } else {
+            console.log("✅ Authorized! Showing Product Page...");
+        }
+    } catch (error) {
+        console.error("⚠️ Error fetching product:", error);
+    }
+});
+
+
 
 
 </script>
