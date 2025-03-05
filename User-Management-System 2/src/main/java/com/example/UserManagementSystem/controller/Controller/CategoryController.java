@@ -4,16 +4,21 @@ import com.example.UserManagementSystem.dto.CategoryRequest;
 import com.example.UserManagementSystem.dto.CategoryResponse;
 import com.example.UserManagementSystem.service.CategoryService;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/category")
+@Slf4j
 public class CategoryController {
 
     @Autowired
@@ -44,10 +49,16 @@ public class CategoryController {
     }
 
     // Create or Update Category
-    @PostMapping("/save")
-    public String createCategory(@Valid @ModelAttribute("category") CategoryRequest categoryRequest) {
+    @PostMapping
+    @ResponseBody
+    public ResponseEntity<Map<String, String>> createCategory(@Valid @RequestBody CategoryRequest categoryRequest) {
+        log.info("Incoming Category Request: " + categoryRequest);
         categoryService.createOrUpdateCategory(categoryRequest);
-        return "redirect:/category";
+
+        // Return JSON response instead of redirect
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Category saved successfully!");
+        return ResponseEntity.ok(response);
     }
 
     // Delete Category

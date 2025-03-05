@@ -39,18 +39,17 @@
 <div class="container mt-5">
     <h2>Category Management</h2>
 
-    <!-- Form to Create/Update Category -->
-    <form th:action="@{/category/save}" th:object="${category}" method="post" class="form-container shadow-sm">
-        <input type="hidden" th:field="*{uniqueId}">
+    <!-- Form to Create Category -->
+    <form id="createCategoryForm" class="form-container shadow-sm">
         <div class="mb-3">
             <label for="categoryName" class="form-label">Category Name</label>
-            <input type="text" class="form-control" id="categoryName" th:field="*{categoryName}" required>
+            <input type="text" class="form-control" id="categoryName" required>
         </div>
         <div class="mb-3">
             <label for="categoryDesc" class="form-label">Category Description</label>
-            <textarea class="form-control" id="categoryDesc" th:field="*{categoryDesc}" rows="3"></textarea>
+            <textarea class="form-control" id="categoryDesc" rows="3"></textarea>
         </div>
-        <button type="submit" class="btn btn-primary w-100">Save Category</button>
+        <button type="button" class="btn btn-primary w-100" onclick="createCategory()">Save Category</button>
     </form>
 
     <hr>
@@ -72,13 +71,129 @@
             <td th:text="${category.categoryName}"></td>
             <td th:text="${category.categoryDesc}"></td>
             <td>
-                <a th:href="@{/category/edit/{id}(id=${category.uniqueId})}" class="btn btn-warning btn-sm">Edit</a>
-                <a th:href="@{/category/delete/{id}(id=${category.uniqueId})}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?')">Delete</a>
+                <!-- Edit Button -->
+                <button type="button" class="btn btn-warning btn-sm"
+                        th:attr="data-id=${category.uniqueId}, data-name=${category.categoryName}, data-desc=${category.categoryDesc}"
+                        onclick="openEditForm(this)">
+                    Edit
+                </button>
+
+                <!-- Delete Button -->
+                <a th:href="@{/category/delete/{id}(id=${category.uniqueId})}"
+                   class="btn btn-danger btn-sm"
+                   onclick="return confirm('Are you sure?')">Delete</a>
             </td>
         </tr>
         </tbody>
     </table>
 </div>
+
+<!-- Edit Category Modal -->
+<div id="editCategoryModal" class="modal fade" tabindex="-1" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editCategoryModalLabel">Edit Category</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editCategoryForm">
+                    <input type="hidden" id="editCategoryId">
+
+                    <div class="mb-3">
+                        <label for="editCategoryName" class="form-label">Category Name</label>
+                        <input type="text" class="form-control" id="editCategoryName" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="editCategoryDesc" class="form-label">Category Description</label>
+                        <textarea class="form-control" id="editCategoryDesc" rows="3"></textarea>
+                    </div>
+
+                    <button type="button" class="btn btn-primary w-100" onclick="updateCategory()">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toastContainer" class="toast-container position-fixed bottom-0 start-50 translate-middle-x p-3"></div>
+
+<script>
+    function showToast(message, isError = false) {
+        let toastContainer = document.getElementById("toastContainer");
+
+        let toastHTML = `
+            <div class="toast align-items-center text-white ${isError ? 'bg-danger' : 'bg-success'} border-0 show" role="alert">
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        `;
+
+        toastContainer.innerHTML = toastHTML;
+
+        let toastElement = document.querySelector(".toast");
+        let toast = new bootstrap.Toast(toastElement);
+        toast.show();
+    }
+
+    function createCategory() {
+        let categoryData = {
+            categoryName: document.getElementById("categoryName").value,
+            categoryDesc: document.getElementById("categoryDesc").value
+        };
+
+        fetch('/category', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(categoryData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            showToast("Category created successfully!");
+            setTimeout(() => location.reload(), 1500);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast("Error creating category", true);
+        });
+    }
+
+    function openEditForm(button) {
+        document.getElementById("editCategoryId").value = button.getAttribute("data-id") || "";
+        document.getElementById("editCategoryName").value = button.getAttribute("data-name") || "";
+        document.getElementById("editCategoryDesc").value = button.getAttribute("data-desc") || "";
+
+        let modal = new bootstrap.Modal(document.getElementById("editCategoryModal"));
+        modal.show();
+    }
+
+    function updateCategory() {
+        let categoryData = {
+            uniqueId: document.getElementById("editCategoryId").value,
+            categoryName: document.getElementById("editCategoryName").value,
+            categoryDesc: document.getElementById("editCategoryDesc").value
+        };
+
+        fetch('/category', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(categoryData)
+        })
+        .then(response => response.text())
+        .then(data => {
+            showToast("Category updated successfully!");
+            setTimeout(() => location.reload(), 1500);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast("Error updating category", true);
+        });
+    }
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
