@@ -40,11 +40,11 @@ public class CategoryController {
         List<CategoryResponse> categoryResponses = categoryResponsePage.getContent();
         model.addAttribute("categories", categoryResponses);
         model.addAttribute("category", new CategoryRequest(null, "", "")); // Ensuring form is empty for new entry
-        model.addAttribute("currentPage", page);
+        model.addAttribute("page", page);
         model.addAttribute("totalPages", categoryResponsePage.getTotalPages());
-        model.addAttribute("pageSize", size);
-        model.addAttribute("sortField", field);
-        model.addAttribute("sortDirection", order);
+        model.addAttribute("size", size);
+        model.addAttribute("field", field);
+        model.addAttribute("order", order);
         return "category";
     }
 

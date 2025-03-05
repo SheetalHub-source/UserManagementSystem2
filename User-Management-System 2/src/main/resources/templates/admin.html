@@ -19,21 +19,7 @@
             margin: auto;
             margin-top: 50px;
         }
-        .admin-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: #d63384;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .admin-btn:hover {
-            background-color: #c2185b;
-        }
+
         .modal {
             display: none;
             position: fixed;
@@ -94,6 +80,68 @@
     margin-top: 4px;
     display: block;
 }
+/* Pagination Styling */
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.pagination button {
+    background-color: #d63384;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    margin: 0 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s ease;
+}
+
+.pagination button:hover {
+    background-color: #c2185b;
+}
+
+.pagination button.active {
+    background-color: #6c757d;
+}
+
+.backButton {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    position: fixed;
+    bottom: 20px; /* Adjusted to avoid overlap */
+    right: 20px;
+}
+
+.backButton:hover {
+    background-color: #5a6268;
+}
+
+.admin-btn {
+    position: fixed;
+    bottom: 70px; /* Moved up to avoid overlap */
+    right: 20px;
+    background-color: #d63384;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.admin-btn:hover {
+    background-color: #c2185b;
+}
+
+
 
 
     </style>
@@ -128,6 +176,11 @@
                 <option value="desc">Desc</option>
             </select>
 
+            <label for="pageNumber">Page Number:</label>
+            <input type="number" id="pageNumber" placeholder="Page Number" min="1" name="pageNumber">
+            <label for="pageSize">Page Size:</label>
+            <input type="number" id="pageSize" placeholder="Page Size" min="1" value="5" name="pageSize">
+
             <button type="button" class="btn btn-primary ms-2" onclick="searchAdmins()">Search</button>
         </div>
     </form>
@@ -139,7 +192,7 @@
             <th>ID</th>
             <th>Admin Name</th>
             <th>Email</th>
-            <th>Password</th>
+            <!--<th>Password</th>-->
             <th>Actions</th>
         </tr>
         </thead>
@@ -148,7 +201,7 @@
             <td th:text="${user.uniqueId}"></td>
             <td th:text="${user.userName}"></td>
             <td th:text="${user.email}"></td>
-            <td th:text="${user.password}"></td>
+<!--            <td th:text="${user.password}"></td>-->
             <td>
                 <button class="btn btn-danger btn-sm" th:attr="onclick='deleteAdmin(' + ${user.uniqueId} + ')'" >Delete</button>
                 <button class="btn btn-primary"
@@ -178,7 +231,7 @@
                 <span class="error-message" id="emailUpdateError" style="color: red;"></span>
 
                 <label for="password">Password:</label>
-                <input type="text" id="password" name="password">
+                <input type="text" id="password" name="password" placeholder="Enter new password">
                 <span class="error-message" id="passwordUpdateError" style="color: red;"></span>
 
                 <label for="role">Role:</label>
@@ -227,215 +280,253 @@
 
 
     <!-- Pagination -->
-    <nav>
-        <ul class="pagination justify-content-center">
-            <li th:if="${currentPage > 0}" class="page-item">
-                <a class="page-link" th:href="@{/admin(page=${currentPage - 1})}">Previous</a>
-            </li>
+    <div class="pagination">
+        <!-- Previous Button -->
+        <button th:if="${currentPage > 0}"
+                th:data-page="${currentPage - 1}"
+                th:data-size="${size}"
+                th:data-field="${sortField}"
+                th:data-order="${sortDirection}"
+                onclick="goToPage(this)">
+            Previous
+        </button>
 
-            <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}" class="page-item">
-                <a class="page-link" th:href="@{/admin(page=${i})}" th:text="${i + 1}"></a>
-            </li>
+        <!-- Page Numbers -->
+        <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+            <button th:text="${i + 1}"
+            th:classappend="${i == currentPage} ? 'active'"
+            th:data-page="${i}"
+            th:data-size="${size}"
+            th:data-field="${sortField}"
+            th:data-order="${sortDirection}"
+            onclick="goToPage(this)">
+            </button>
+        </th:block>
 
-            <li th:if="${currentPage < totalPages - 1}" class="page-item">
-                <a class="page-link" th:href="@{/admin(page=${currentPage + 1})}">Next</a>
-            </li>
-        </ul>
-    </nav>
+        <!-- Next Button -->
+        <button th:if="${currentPage < totalPages - 1}"
+                th:data-page="${currentPage + 1}"
+                th:data-size="${size}"
+        th:data-field="${sortField}"
+        th:data-order="${sortDirection}"
+        onclick="goToPage(this)">
+        Next
+        </button>
+    </div>
 
 </div>
 
 <!-- Create Admin Button -->
 <button class="admin-btn" onclick="openCreateModal()">Create Admin</button>
+<!-- Back Button -->
+<button class="backButton" onclick="goBack()">← Back</button>
 
 <script>
-    document.getElementById("createAdminForm").addEventListener("submit", function (event) {
-    event.preventDefault(); // Prevent default form submission
-
-    // Clear previous errors
-    document.querySelectorAll(".error-message").forEach(el => el.innerText = "");
-
-    const userData = {
-        userName: document.getElementById("newUsername").value,
-        email: document.getElementById("newEmail").value,
-        password: document.getElementById("newPassword").value,
-        role: document.getElementById("newRole").value
-    };
-
-
-
-    fetch("/api/admin", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(userData)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.Message === "Validation Failed" && data.Error) {
-            // Loop through each error and append message instead of replacing
-            data.Error.forEach(error => {
-                if (error.toLowerCase().includes("invalid username") || error.toLowerCase().includes("user with same username")) {
-                    document.getElementById("usernameError").innerHTML += `<div>${error}</div>`;
-                }
-                if (error.toLowerCase().includes("email")) {
-                    document.getElementById("emailError").innerHTML += `<div>${error}</div>`;
-                }
-                if (error.toLowerCase().includes("password")) {
-                    document.getElementById("passwordError").innerHTML += `<div>${error}</div>`;
-                }
-                if (error.toLowerCase().includes("role")) {
-                    document.getElementById("roleError").innerHTML += `<div>${error}</div>`;
-                }
-            });
-        } else {
-            alert(data.message || "Admin created successfully!");
-            closeCreateModal();
-            window.location.reload();
-        }
-    })
-    .catch(error => console.error("Error:", error));
-});
-
-
-     function searchAdmins() {
-        const nameValue = document.getElementById("searchByName").value.trim();
-        const emailValue = document.getElementById("searchByEmail").value.trim();
-        const idValue = document.getElementById("searchById").value.trim();
-        const sortBy = document.getElementById("sortBy").value;
-        const sortOrder = document.getElementById("sortOrder").value;
-       let field = "uniqueId";
-
-if (sortBy === "name") {
-    field = "userName";
-} else if (sortBy === "email") {
-    field = "email";
+    function goBack() {
+    window.history.back();
 }
 
-   let queryParams = new URLSearchParams();
+    function goToPage(button) {
+     let page = button.getAttribute("data-page");
+ let size = button.getAttribute("data-size") || 5;
+ console.log("Size is "+size)
+     let field = button.getAttribute("data-field");
+     let order = button.getAttribute("data-order");
 
-    if (nameValue) queryParams.append("userName", nameValue);
-    if (emailValue) queryParams.append("email", emailValue);
-    if (idValue) queryParams.append("uniqueId", idValue);
+     window.location.href = `?page=${page}&size=${size}&field=${field}&order=${order}`;  // Fixed 'orderBy' issue
+ }
+     document.getElementById("createAdminForm").addEventListener("submit", function (event) {
+     event.preventDefault(); // Prevent default form submission
 
-     queryParams.append("role","ADMIN");
-    // Sorting parameters
-    queryParams.append("field", field);
-    queryParams.append("order", sortOrder);
-        window.location.href = `/api/admin?${queryParams.toString()}`;
+     // Clear previous errors
+     document.querySelectorAll(".error-message").forEach(el => el.innerText = "");
 
-    }
+     const userData = {
+         userName: document.getElementById("newUsername").value,
+         email: document.getElementById("newEmail").value,
+         password: document.getElementById("newPassword").value,
+         role: document.getElementById("newRole").value
+     };
 
 
-     function openUpdateModal(id, name, email, password) {
-         document.getElementById('adminId').value = id;
-         document.getElementById('username').value = name;
-         document.getElementById('email').value = email;
-         document.getElementById('password').value = password;
 
-         document.getElementById('updateAdminModal').style.display = 'block';
+     fetch("/api/admin", {
+         method: "POST",
+         headers: {
+             "Content-Type": "application/json"
+         },
+         body: JSON.stringify(userData)
+     })
+     .then(response => response.json())
+     .then(data => {
+         if (data.Message === "Validation Failed" && data.Error) {
+             // Loop through each error and append message instead of replacing
+             data.Error.forEach(error => {
+                 if (error.toLowerCase().includes("invalid username") || error.toLowerCase().includes("user with same username")) {
+                     document.getElementById("usernameError").innerHTML += `<div>${error}</div>`;
+                 }
+                 if (error.toLowerCase().includes("email")) {
+                     document.getElementById("emailError").innerHTML += `<div>${error}</div>`;
+                 }
+                 if (error.toLowerCase().includes("password")) {
+                     document.getElementById("passwordError").innerHTML += `<div>${error}</div>`;
+                 }
+                 if (error.toLowerCase().includes("role")) {
+                     document.getElementById("roleError").innerHTML += `<div>${error}</div>`;
+                 }
+             });
+         } else {
+             alert(data.message || "Admin created successfully!");
+             closeCreateModal();
+             window.location.reload();
+         }
+     })
+     .catch(error => console.error("Error:", error));
+ });
+
+
+      function searchAdmins() {
+         const nameValue = document.getElementById("searchByName").value.trim();
+         const emailValue = document.getElementById("searchByEmail").value.trim();
+         const idValue = document.getElementById("searchById").value.trim();
+         const sortBy = document.getElementById("sortBy").value;
+         const sortOrder = document.getElementById("sortOrder").value;
+         const page = document.getElementById("pageNumber").value;
+         const size = document.getElementById("pageSize").value;
+
+        let field = "uniqueId";
+
+ if (sortBy === "name") {
+     field = "userName";
+ } else if (sortBy === "email") {
+     field = "email";
+ }
+
+    let queryParams = new URLSearchParams();
+
+     if (nameValue) queryParams.append("userName", nameValue);
+     if (emailValue) queryParams.append("email", emailValue);
+     if (idValue) queryParams.append("uniqueId", idValue);
+
+      queryParams.append("role","ADMIN");
+     // Sorting parameters
+     queryParams.append("field", field);
+     queryParams.append("order", sortOrder);
+     queryParams.append("size", size);
+     queryParams.append("page", page);
+         window.location.href = `/api/admin?${queryParams.toString()}`;
+
      }
 
 
-     document.getElementById("updateAdminForm").addEventListener("submit", function (event) {
-    event.preventDefault(); // Prevent default form submission
+      function openUpdateModal(id, name, email, password) {
+          document.getElementById('adminId').value = id;
+          document.getElementById('username').value = name;
+          document.getElementById('email').value = email;
+          //document.getElementById('password').value = password;
 
-    // Clear previous errors
-    document.querySelectorAll(".error-message").forEach(el => el.innerText = "");
+          document.getElementById('updateAdminModal').style.display = 'block';
+      }
 
-    // Collect data from form fields
-    const adminId = document.getElementById("adminId").value;
-    const username = document.getElementById("username").value;
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
 
-    // Prepare data object
-    const adminData = {
-        uniqueId: adminId,
-        userName: username,
-        email: email,
-        password: password,
-        role: "ADMIN"
-    };
+      document.getElementById("updateAdminForm").addEventListener("submit", function (event) {
+     event.preventDefault(); // Prevent default form submission
 
-    fetch(`/api/admin`, {
-        method: "POST",  // Use PUT if your API expects it for updates
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(adminData)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.Message === "Validation Failed" && data.Error) {
-            // Loop through each error and append message
-            data.Error.forEach(error => {
-                if (error.toLowerCase().includes("invalid username") || error.toLowerCase().includes("user with same username")) {
-                    document.getElementById("usernameUpdateError").innerHTML += `<div>${error}</div>`;
-                }
-                if (error.toLowerCase().includes("email")) {
-                    document.getElementById("emailUpdateError").innerHTML += `<div>${error}</div>`;
-                }
-                if (error.toLowerCase().includes("password")) {
-                    document.getElementById("passwordUpdateError").innerHTML += `<div>${error}</div>`;
-                }
-            });
-        } else {
-            alert(data.message || "Admin updated successfully!");
-            closeUpdateModal();
-            window.location.reload();
-        }
-    })
-    .catch(error => console.error("Error updating admin:", error));
-});
+     // Clear previous errors
+     document.querySelectorAll(".error-message").forEach(el => el.innerText = "");
 
-     function closeUpdateModal() {
-         document.getElementById('updateAdminModal').style.display = 'none';
+     // Collect data from form fields
+     const adminId = document.getElementById("adminId").value;
+     const username = document.getElementById("username").value;
+     const email = document.getElementById("email").value;
+     const password = document.getElementById("password").value;
+
+     // Prepare data object
+     const adminData = {
+         uniqueId: adminId,
+         userName: username,
+         email: email,
+         password: password,
+         role: "ADMIN"
+     };
+
+     fetch(`/api/admin`, {
+         method: "POST",  // Use PUT if your API expects it for updates
+         headers: {
+             "Content-Type": "application/json"
+         },
+         body: JSON.stringify(adminData)
+     })
+     .then(response => response.json())
+     .then(data => {
+         if (data.Message === "Validation Failed" && data.Error) {
+             // Loop through each error and append message
+             data.Error.forEach(error => {
+                 if (error.toLowerCase().includes("invalid username") || error.toLowerCase().includes("user with same username")) {
+                     document.getElementById("usernameUpdateError").innerHTML += `<div>${error}</div>`;
+                 }
+                 if (error.toLowerCase().includes("email")) {
+                     document.getElementById("emailUpdateError").innerHTML += `<div>${error}</div>`;
+                 }
+                 if (error.toLowerCase().includes("password")) {
+                     document.getElementById("passwordUpdateError").innerHTML += `<div>${error}</div>`;
+                 }
+             });
+         } else {
+             alert(data.message || "Admin updated successfully!");
+             closeUpdateModal();
+             window.location.reload();
+         }
+     })
+     .catch(error => console.error("Error updating admin:", error));
+ });
+
+      function closeUpdateModal() {
+          document.getElementById('updateAdminModal').style.display = 'none';
+      }
+
+
+      // Open Create Modal
+  function openCreateModal() {
+      document.getElementById("createAdminModal").style.display = "block";
+  }
+
+  // Close Create Modal
+  function closeCreateModal() {
+      document.getElementById("createAdminModal").style.display = "none";
+  }
+
+ function deleteAdmin(uniqueId) {
+     if (!confirm("Are you sure you want to delete this admin?")) {
+         return; // Stop if user cancels
      }
 
-
-     // Open Create Modal
- function openCreateModal() {
-     document.getElementById("createAdminModal").style.display = "block";
+     fetch(`/api/admin/${uniqueId}`, {
+         method: "DELETE",
+         headers: {
+             "Content-Type": "application/json",
+         },
+     })
+     .then(response => {
+         if (response.status === 204) {
+             // 204 No Content - No JSON body
+             return { status: response.status, body: { message: "Admin deleted successfully!" } };
+         }
+         return response.json().then(data => ({ status: response.status, body: data }));
+     })
+     .then(({ status, body }) => {
+         if (status >= 200 && status < 300) {
+             alert(body.message || "Admin deleted successfully!");
+             location.reload(); // Refresh page
+         } else {
+             alert(body.error || "Failed to delete admin.");
+         }
+     })
+     .catch(error => {
+         console.error("Error:", error);
+         alert("An error occurred while deleting the admin.");
+     });
  }
-
- // Close Create Modal
- function closeCreateModal() {
-     document.getElementById("createAdminModal").style.display = "none";
- }
-
-function deleteAdmin(uniqueId) {
-    if (!confirm("Are you sure you want to delete this admin?")) {
-        return; // Stop if user cancels
-    }
-
-    fetch(`/api/admin/${uniqueId}`, {
-        method: "DELETE",
-        headers: {
-            "Content-Type": "application/json",
-        },
-    })
-    .then(response => {
-        if (response.status === 204) {
-            // 204 No Content - No JSON body
-            return { status: response.status, body: { message: "Admin deleted successfully!" } };
-        }
-        return response.json().then(data => ({ status: response.status, body: data }));
-    })
-    .then(({ status, body }) => {
-        if (status >= 200 && status < 300) {
-            alert(body.message || "Admin deleted successfully!");
-            location.reload(); // Refresh page
-        } else {
-            alert(body.error || "Failed to delete admin.");
-        }
-    })
-    .catch(error => {
-        console.error("Error:", error);
-        alert("An error occurred while deleting the admin.");
-    });
-}
 
 
 

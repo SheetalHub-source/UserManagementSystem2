@@ -32,7 +32,7 @@ public class AdminController {
     @GetMapping
     public String listUsers(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "5") Integer size,
             @RequestParam(defaultValue = "desc") String order,
             @RequestParam(defaultValue = "uniqueId") String field,
             @RequestParam(required = false) String uniqueId,
@@ -50,6 +50,7 @@ public class AdminController {
         model.addAttribute("totalPages", userPage.getTotalPages());
         model.addAttribute("sortField", field);
         model.addAttribute("sortDirection", order);
+        model.addAttribute("size",size);
 
         return "admin";
     }

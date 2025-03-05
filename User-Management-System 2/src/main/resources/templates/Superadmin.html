@@ -5,6 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Super Admin Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>.backButton {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+}
+
+.backButton:hover {
+    background-color: #5a6268;
+}
+    </style>
 </head>
 <body class="bg-gray-100">
 <div class="min-h-screen flex flex-col items-center justify-center p-6">
@@ -14,7 +31,7 @@
             <img src="https://img.icons8.com/ios-filled/100/user-shield.png" alt="Manage Admin" class="mb-4">
             <h2 class="text-xl font-semibold">Manage Admin</h2>
         </a>
-        <a href="http://localhost:8080/categories" class="bg-white shadow-lg rounded-lg p-6 flex flex-col items-center hover:shadow-xl transition">
+        <a href="http://localhost:8080/category" class="bg-white shadow-lg rounded-lg p-6 flex flex-col items-center hover:shadow-xl transition">
             <img src="https://img.icons8.com/ios-filled/100/category.png" alt="Manage Category" class="mb-4">
             <h2 class="text-xl font-semibold">Manage Category</h2>
         </a>
@@ -24,24 +41,29 @@
         </a>
     </div>
 </div>
-<script>
-    document.addEventListener("DOMContentLoaded", async () => {
-     try {
-         let response = await fetch("http://localhost:8080//superadmin-dashboard", {
-             method: "GET",
-             credentials: "include", // ✅ JWT Cookie automatically send hoga
-         });
+<button class="backButton" onclick="goBack()">← Back</button>
 
-         if (response.status === 401) {
-             console.log("🚫 Unauthorized! Redirecting to Login...");
-             window.location.href = "/login";
-         } else {
-             console.log("✅ Authorized! Showing Product Page...");
-         }
-     } catch (error) {
-         console.error("⚠️ Error fetching product:", error);
-     }
- });
+<script>
+    function goBack() {
+  window.history.back();
+}
+  document.addEventListener("DOMContentLoaded", async () => {
+   try {
+       let response = await fetch("http://localhost:8080//superadmin-dashboard", {
+           method: "GET",
+           credentials: "include", // ✅ JWT Cookie automatically send hoga
+       });
+
+       if (response.status === 401) {
+           console.log("🚫 Unauthorized! Redirecting to Login...");
+           window.location.href = "/login";
+       } else {
+           console.log("✅ Authorized! Showing Product Page...");
+       }
+   } catch (error) {
+       console.error("⚠️ Error fetching product:", error);
+   }
+});
 
 </script>
 

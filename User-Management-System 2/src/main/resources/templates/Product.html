@@ -144,6 +144,23 @@
 .pagination .active {
     background-color: #28a745;
 }
+        .backButton {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+}
+
+.backButton:hover {
+    background-color: #5a6268;
+}
+
 
     </style>
 </head>
@@ -312,344 +329,345 @@
         </form>
     </div>
 </div>
-
-
-
+<button class="backButton" onclick="goBack()">← Back</button>
 
 
 <script>
-    function goToPage(button) {
-     let page = button.getAttribute("data-page");
-     let size = button.getAttribute("data-size");
-     let field = button.getAttribute("data-field");
-     let order = button.getAttribute("data-order");
+    function goBack() {
+  window.history.back();
+}
+  function goToPage(button) {
+   let page = button.getAttribute("data-page");
+   let size = button.getAttribute("data-size");
+   let field = button.getAttribute("data-field");
+   let order = button.getAttribute("data-order");
 
-     window.location.href = `?page=${page}&size=${size}&field=${field}&orderBy=${order}`;
- }
+   window.location.href = `?page=${page}&size=${size}&field=${field}&orderBy=${order}`;
+}
 
- //Search Products
+//Search Products
 function searchProducts() {
-        let productName = document.getElementById("searchProductName").value;
-        let productId = document.getElementById("searchProductId").value;
-        let sortBy = document.getElementById("sortBy").value;
-        let order = document.getElementById("order").value;
-        let category = document.getElementById("searchCategory").value;
-        let minPrice = document.getElementById("searchPriceMin").value;
-        let maxPrice = document.getElementById("searchPriceMax").value;
-        let pageNumber = document.getElementById("pageNumber").value;
-        let pageSize = document.getElementById("pageSize").value;
+      let productName = document.getElementById("searchProductName").value;
+      let productId = document.getElementById("searchProductId").value;
+      let sortBy = document.getElementById("sortBy").value;
+      let order = document.getElementById("order").value;
+      let category = document.getElementById("searchCategory").value;
+      let minPrice = document.getElementById("searchPriceMin").value;
+      let maxPrice = document.getElementById("searchPriceMax").value;
+      let pageNumber = document.getElementById("pageNumber").value;
+      let pageSize = document.getElementById("pageSize").value;
 
-        let queryParams = new URLSearchParams();
+      let queryParams = new URLSearchParams();
 
-        if (productName) queryParams.append("productName", productName);
-        if (productId) queryParams.append("uniqueProductId", productId);
-        if (sortBy) queryParams.append("field", sortBy);
-        if (order) queryParams.append("orderBy", order);
-        if (category) queryParams.append("categoryName", category);
-        if (minPrice) queryParams.append("minPrice", minPrice);
-        if (maxPrice)  queryParams.append("maxPrice", maxPrice);
-        if (pageNumber) queryParams.append("page", pageNumber);
-        if (pageSize) queryParams.append("size", pageSize);
+      if (productName) queryParams.append("productName", productName);
+      if (productId) queryParams.append("uniqueProductId", productId);
+      if (sortBy) queryParams.append("field", sortBy);
+      if (order) queryParams.append("orderBy", order);
+      if (category) queryParams.append("categoryName", category);
+      if (minPrice) queryParams.append("minPrice", minPrice);
+      if (maxPrice)  queryParams.append("maxPrice", maxPrice);
+      if (pageNumber) queryParams.append("page", pageNumber);
+      if (pageSize) queryParams.append("size", pageSize);
 
-        window.location.href =  `/product?${queryParams.toString()}`;
-    }
+      window.location.href =  `/product?${queryParams.toString()}`;
+  }
 
 
 //Create Products
 
 function openForm() {
-        document.getElementById("createProductModal").classList.remove("hidden");
-    }
+      document.getElementById("createProductModal").classList.remove("hidden");
+  }
 
-    function closeForm() {
-        document.getElementById("createProductModal").classList.add("hidden");
-    }
+  function closeForm() {
+      document.getElementById("createProductModal").classList.add("hidden");
+  }
 
-    window.onclick = function(event) {
-        let modal = document.getElementById("createProductModal");
-        if (event.target === modal) {
-            closeForm();
-        }
-    }
+  window.onclick = function(event) {
+      let modal = document.getElementById("createProductModal");
+      if (event.target === modal) {
+          closeForm();
+      }
+  }
 function addVariant() {
-    const variantContainer = document.getElementById("variantsContainer");
+  const variantContainer = document.getElementById("variantsContainer");
 
-    // Remove the previous "Add Variant" button (if exists)
-    const lastButton = variantContainer.querySelector(".add-variant-btn");
-    if (lastButton) {
-        lastButton.remove();
-    }
+  // Remove the previous "Add Variant" button (if exists)
+  const lastButton = variantContainer.querySelector(".add-variant-btn");
+  if (lastButton) {
+      lastButton.remove();
+  }
 
-    // Create a new variant form
-    const variantForm = document.createElement("div");
-    variantForm.classList.add("mt-4", "p-4", "border", "border-gray-300", "rounded-md", "bg-gray-100");
+  // Create a new variant form
+  const variantForm = document.createElement("div");
+  variantForm.classList.add("mt-4", "p-4", "border", "border-gray-300", "rounded-md", "bg-gray-100");
 
-    variantForm.innerHTML = `
-        <label class="block text-gray-600 text-sm font-semibold mt-3">Variant Details:</label>
-        <div class="variant-attributes">
-            <div class="option-group flex space-x-2 mt-2">
-                <input type="text" name="optionName[]" placeholder="Enter option"
-                    class="border border-gray-300 p-2 rounded-md w-1/2 focus:ring focus:ring-blue-300 focus:border-blue-500" required>
-                <input type="text" name="optionValue[]" placeholder="Enter value"
-                    class="border border-gray-300 p-2 rounded-md w-1/2 focus:ring focus:ring-blue-300 focus:border-blue-500" required>
-            </div>
-        </div>
+  variantForm.innerHTML = `
+      <label class="block text-gray-600 text-sm font-semibold mt-3">Variant Details:</label>
+      <div class="variant-attributes">
+          <div class="option-group flex space-x-2 mt-2">
+              <input type="text" name="optionName[]" placeholder="Enter option"
+                  class="border border-gray-300 p-2 rounded-md w-1/2 focus:ring focus:ring-blue-300 focus:border-blue-500" required>
+              <input type="text" name="optionValue[]" placeholder="Enter value"
+                  class="border border-gray-300 p-2 rounded-md w-1/2 focus:ring focus:ring-blue-300 focus:border-blue-500" required>
+          </div>
+      </div>
 
-        <button type="button" class="add-attribute-btn bg-blue-500 text-white px-3 py-1 rounded-md mt-2">
-            + Add Attribute
-        </button>
+      <button type="button" class="add-attribute-btn bg-blue-500 text-white px-3 py-1 rounded-md mt-2">
+          + Add Attribute
+      </button>
 
-        <label class="block text-gray-600 text-sm font-semibold mt-3">Variant Image:</label>
-        <input type="file" id="variantImages" name="variantImage[]" accept="image/*" class="w-full border border-gray-300 p-2 rounded-md focus:ring focus:ring-blue-300 focus:border-blue-500" required>
+      <label class="block text-gray-600 text-sm font-semibold mt-3">Variant Image:</label>
+      <input type="file" id="variantImages" name="variantImage[]" accept="image/*" class="w-full border border-gray-300 p-2 rounded-md focus:ring focus:ring-blue-300 focus:border-blue-500" required>
 
-        <div class="flex space-x-2 mt-3">
-            <button type="button" onclick="removeVariant(this)" class="bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition">
-                Remove Variant
-            </button>
-        </div>
-    `;
+      <div class="flex space-x-2 mt-3">
+          <button type="button" onclick="removeVariant(this)" class="bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition">
+              Remove Variant
+          </button>
+      </div>
+  `;
 
-    // Append the new variant form
-    variantContainer.appendChild(variantForm);
+  // Append the new variant form
+  variantContainer.appendChild(variantForm);
 
-    // Add dynamic attribute functionality
-    const addAttributeBtn = variantForm.querySelector(".add-attribute-btn");
-    addAttributeBtn.addEventListener("click", function () {
-        addAttributeField(variantForm.querySelector(".variant-attributes"));
-    });
+  // Add dynamic attribute functionality
+  const addAttributeBtn = variantForm.querySelector(".add-attribute-btn");
+  addAttributeBtn.addEventListener("click", function () {
+      addAttributeField(variantForm.querySelector(".variant-attributes"));
+  });
 
-    // Add "Add Variant" button only to the last variant
-    const addButton = document.createElement("button");
-    addButton.type = "button";
-    addButton.className = "add-variant-btn bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition mt-3";
-    addButton.textContent = "+ Add Variant";
-    addButton.onclick = addVariant;
+  // Add "Add Variant" button only to the last variant
+  const addButton = document.createElement("button");
+  addButton.type = "button";
+  addButton.className = "add-variant-btn bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition mt-3";
+  addButton.textContent = "+ Add Variant";
+  addButton.onclick = addVariant;
 
-    variantContainer.appendChild(addButton);
+  variantContainer.appendChild(addButton);
 }
 
 // Function to add option-value fields dynamically
 function addAttributeField(container) {
-    const optionGroup = document.createElement("div");
-    optionGroup.className = "option-group flex space-x-2 mt-2";
+  const optionGroup = document.createElement("div");
+  optionGroup.className = "option-group flex space-x-2 mt-2";
 
-    const optionInput = document.createElement("input");
-    optionInput.type = "text";
-    optionInput.name = "optionName[]";
-    optionInput.placeholder = "Enter option";
-    optionInput.className = "border border-gray-300 p-2 rounded-md w-1/2 focus:ring focus:ring-blue-300 focus:border-blue-500";
-    optionInput.required = true;
+  const optionInput = document.createElement("input");
+  optionInput.type = "text";
+  optionInput.name = "optionName[]";
+  optionInput.placeholder = "Enter option";
+  optionInput.className = "border border-gray-300 p-2 rounded-md w-1/2 focus:ring focus:ring-blue-300 focus:border-blue-500";
+  optionInput.required = true;
 
-    const valueInput = document.createElement("input");
-    valueInput.type = "text";
-    valueInput.name = "optionValue[]";
-    valueInput.placeholder = "Enter value";
-    valueInput.className = "border border-gray-300 p-2 rounded-md w-1/2 focus:ring focus:ring-blue-300 focus:border-blue-500";
-    valueInput.required = true;
+  const valueInput = document.createElement("input");
+  valueInput.type = "text";
+  valueInput.name = "optionValue[]";
+  valueInput.placeholder = "Enter value";
+  valueInput.className = "border border-gray-300 p-2 rounded-md w-1/2 focus:ring focus:ring-blue-300 focus:border-blue-500";
+  valueInput.required = true;
 
-    optionGroup.appendChild(optionInput);
-    optionGroup.appendChild(valueInput);
-    container.appendChild(optionGroup);
+  optionGroup.appendChild(optionInput);
+  optionGroup.appendChild(valueInput);
+  container.appendChild(optionGroup);
 }
 
 // Function to remove a variant form
 function removeVariant(button) {
-    const variantContainer = document.getElementById("variantsContainer");
-    button.parentElement.parentElement.remove();
+  const variantContainer = document.getElementById("variantsContainer");
+  button.parentElement.parentElement.remove();
 
-    // Ensure "Add Variant" button is present at the last variant
-    if (!document.querySelector(".add-variant-btn")) {
-        const addButton = document.createElement("button");
-        addButton.type = "button";
-        addButton.className = "add-variant-btn bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition mt-3";
-        addButton.textContent = "+ Add Variant";
-        addButton.onclick = addVariant;
+  // Ensure "Add Variant" button is present at the last variant
+  if (!document.querySelector(".add-variant-btn")) {
+      const addButton = document.createElement("button");
+      addButton.type = "button";
+      addButton.className = "add-variant-btn bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition mt-3";
+      addButton.textContent = "+ Add Variant";
+      addButton.onclick = addVariant;
 
-        variantContainer.appendChild(addButton);
-    }
+      variantContainer.appendChild(addButton);
+  }
 }
 
 function getFormData() {
-    const formData = {
-        productName: document.getElementById("productName").value,
-        productDesc: document.getElementById("productDesc").value,
-        price: document.getElementById("price").value,
-        categoryId: document.getElementById("categoryName").value,
-        variantSet: []
-    };
+  const formData = {
+      productName: document.getElementById("productName").value,
+      productDesc: document.getElementById("productDesc").value,
+      price: document.getElementById("price").value,
+      categoryId: document.getElementById("categoryName").value,
+      variantSet: []
+  };
 
-    // Debugging log to check if variants exist
-    console.log("Found Variant Groups:", document.querySelectorAll(".variant-attributes"));
+  // Debugging log to check if variants exist
+  console.log("Found Variant Groups:", document.querySelectorAll(".variant-attributes"));
 
-    // Extract Variants
-    document.querySelectorAll(".variant-attributes").forEach(variantDiv => {
-        let variant = { optionsData: [] };
+  // Extract Variants
+  document.querySelectorAll(".variant-attributes").forEach(variantDiv => {
+      let variant = { optionsData: [] };
 
-        variantDiv.querySelectorAll(".option-group").forEach(optionDiv => {
-            let optionName = optionDiv.querySelector("[name='optionName[]']").value;
-            let optionValue = optionDiv.querySelector("[name='optionValue[]']").value;
+      variantDiv.querySelectorAll(".option-group").forEach(optionDiv => {
+          let optionName = optionDiv.querySelector("[name='optionName[]']").value;
+          let optionValue = optionDiv.querySelector("[name='optionValue[]']").value;
 
-            // Push extracted optionName and optionValue
-            if (optionName && optionValue) {
-                variant.optionsData.push({ option: optionName, value: optionValue });
-            }
-        });
+          // Push extracted optionName and optionValue
+          if (optionName && optionValue) {
+              variant.optionsData.push({ option: optionName, value: optionValue });
+          }
+      });
 
-        // Only push variants that have options
-        if (variant.optionsData.length > 0) {
-            formData.variantSet.push(variant);
-        }
-    });
+      // Only push variants that have options
+      if (variant.optionsData.length > 0) {
+          formData.variantSet.push(variant);
+      }
+  });
 
-    console.log("Final Form Data:", formData);
-    return formData;
+  console.log("Final Form Data:", formData);
+  return formData;
 }
 // Send Data to Controller
 function submitForm(event) {
-    event.preventDefault(); // Default submit rokna zaroori hai
+  event.preventDefault(); // Default submit rokna zaroori hai
 
-    const formDataObject = getFormData(); // JSON object le lo
+  const formDataObject = getFormData(); // JSON object le lo
 
-    const formData = new FormData();
-    formData.append("productRequestField", JSON.stringify(formDataObject));
+  const formData = new FormData();
+  formData.append("productRequestField", JSON.stringify(formDataObject));
 
-    // Product Image append karo
-    const productImage = document.getElementById("productImage").files[0];
-    if (productImage) {
-        formData.append("productImage", productImage);
-    }
+  // Product Image append karo
+  const productImage = document.getElementById("productImage").files[0];
+  if (productImage) {
+      formData.append("productImage", productImage);
+  }
 
-     // Append Variant Images (loop through all variant image inputs)
-    const variantImagesInputs = document.querySelectorAll('input[name="variantImage[]"]');
-    variantImagesInputs.forEach(input => {
-        if (input.files.length > 0) {
-            for (let i = 0; i < input.files.length; i++) {
-                formData.append("variantImage", input.files[i]); // Append each image
-            }
-        }
-    });
+   // Append Variant Images (loop through all variant image inputs)
+  const variantImagesInputs = document.querySelectorAll('input[name="variantImage[]"]');
+  variantImagesInputs.forEach(input => {
+      if (input.files.length > 0) {
+          for (let i = 0; i < input.files.length; i++) {
+              formData.append("variantImage", input.files[i]); // Append each image
+          }
+      }
+  });
 
 
 
-    // Backend request bhejo
-    fetch("/product", {
-        method: "POST",
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log("Response:", data);
-        alert("Product Created Successfully!"); // Success message
-        closeForm(); // Modal close function
-    })
-    .catch(error => console.error("Error:", error));
+  // Backend request bhejo
+  fetch("/product", {
+      method: "POST",
+      body: formData
+  })
+  .then(response => response.json())
+  .then(data => {
+      console.log("Response:", data);
+      alert("Product Created Successfully!"); // Success message
+      closeForm(); // Modal close function
+  })
+  .catch(error => console.error("Error:", error));
 }
-    document.getElementById("createProductForm").addEventListener("submit", submitForm);
+  document.getElementById("createProductForm").addEventListener("submit", submitForm);
 
 
-    function openProductUpdateModal(uniqueProductId, productName, productDesc, price, categoryId, variantsJson) {
-    document.getElementById("modalUpdateProduct").classList.remove("hidden");
+  function openProductUpdateModal(uniqueProductId, productName, productDesc, price, categoryId, variantsJson) {
+  document.getElementById("modalUpdateProduct").classList.remove("hidden");
 
-    // Fill product details
-    document.getElementById("fieldProductId").value = productId;
-    document.getElementById("fieldProductName").value = productName;
-    document.getElementById("fieldProductDesc").value = productDesc;
-    document.getElementById("fieldProductPrice").value = productPrice;
-    document.getElementById("fieldCategoryName").value = categoryId;
+  // Fill product details
+  document.getElementById("fieldProductId").value = productId;
+  document.getElementById("fieldProductName").value = productName;
+  document.getElementById("fieldProductDesc").value = productDesc;
+  document.getElementById("fieldProductPrice").value = productPrice;
+  document.getElementById("fieldCategoryName").value = categoryId;
 
-    // Clear existing variants
-    document.getElementById("containerVariants").innerHTML = "";
+  // Clear existing variants
+  document.getElementById("containerVariants").innerHTML = "";
 
-    // Convert JSON string to object
-    let variants = JSON.parse(variantsJson);
+  // Convert JSON string to object
+  let variants = JSON.parse(variantsJson);
 
-    // Populate variants
-    variants.forEach(variant => {
-        addProductVariant(variant);
-    });
+  // Populate variants
+  variants.forEach(variant => {
+      addProductVariant(variant);
+  });
 }
 
 // Function to add a new variant dynamically
 function addProductVariant(existingVariant = null) {
-    let containerVariants = document.getElementById("containerVariants");
-    let variantIndex = document.querySelectorAll(".variant").length; // Unique index for each variant
+  let containerVariants = document.getElementById("containerVariants");
+  let variantIndex = document.querySelectorAll(".variant").length; // Unique index for each variant
 
-    let variantDiv = document.createElement("div");
-    variantDiv.classList.add("variant", "border", "p-3", "rounded-md", "mt-2");
-    variantDiv.innerHTML = `
-        <input type="hidden" name="variants[${variantIndex}].variantId" value="${existingVariant ? existingVariant.id : ''}">
+  let variantDiv = document.createElement("div");
+  variantDiv.classList.add("variant", "border", "p-3", "rounded-md", "mt-2");
+  variantDiv.innerHTML = `
+      <input type="hidden" name="variants[${variantIndex}].variantId" value="${existingVariant ? existingVariant.id : ''}">
 
-        <label class="block text-gray-600 text-sm font-semibold">Variant Name:</label>
-        <input type="text" name="variants[${variantIndex}].name" class="w-full border border-gray-300 p-2 rounded-md" value="${existingVariant ? existingVariant.name : ''}" required>
+      <label class="block text-gray-600 text-sm font-semibold">Variant Name:</label>
+      <input type="text" name="variants[${variantIndex}].name" class="w-full border border-gray-300 p-2 rounded-md" value="${existingVariant ? existingVariant.name : ''}" required>
 
-        <label class="block text-gray-600 text-sm font-semibold mt-2">Variant Price (₹):</label>
-        <input type="number" name="variants[${variantIndex}].price" class="w-full border border-gray-300 p-2 rounded-md" value="${existingVariant ? existingVariant.price : ''}" required>
+      <label class="block text-gray-600 text-sm font-semibold mt-2">Variant Price (₹):</label>
+      <input type="number" name="variants[${variantIndex}].price" class="w-full border border-gray-300 p-2 rounded-md" value="${existingVariant ? existingVariant.price : ''}" required>
 
-        <button type="button" onclick="removeProductVariant(this)" class="mt-2 bg-red-500 text-white py-1 px-3 rounded-md hover:bg-red-600 transition">
-            Remove
-        </button>
-    `;
-    containerVariants.appendChild(variantDiv);
+      <button type="button" onclick="removeProductVariant(this)" class="mt-2 bg-red-500 text-white py-1 px-3 rounded-md hover:bg-red-600 transition">
+          Remove
+      </button>
+  `;
+  containerVariants.appendChild(variantDiv);
 }
 
 // Function to remove a variant
 function removeProductVariant(button) {
-    button.parentElement.remove();
+  button.parentElement.remove();
 }
 
 // Function to close the update modal
 function closeProductUpdateModal() {
-    document.getElementById("modalUpdateProduct").classList.add("hidden");
+  document.getElementById("modalUpdateProduct").classList.add("hidden");
 }
 
-    function updateProducts(uniqueProductId) {
-    // Making the GET request to the controller with the uniqueProductId
-    fetch(`/product/${uniqueProductId}`)
-        .then(response => response.json())  // Assuming the response is in JSON format
-        .then(data => {
-            console.log('Product Data:', data);
-            // You can handle the response here
-        })
-        .catch(error => {
-            console.error('Error fetching product details:', error);
-        });
+  function updateProducts(uniqueProductId) {
+  // Making the GET request to the controller with the uniqueProductId
+  fetch(`/product/${uniqueProductId}`)
+      .then(response => response.json())  // Assuming the response is in JSON format
+      .then(data => {
+          console.log('Product Data:', data);
+          // You can handle the response here
+      })
+      .catch(error => {
+          console.error('Error fetching product details:', error);
+      });
 }
 
-    function deleteProduct(uniqueProductId) {
-    fetch(`/product/${uniqueProductId}`, {
-        method: 'DELETE',
-    })
-    .then(response => response.json())
-    .then(data => {
-        console.log('Product deleted:', data);
+  function deleteProduct(uniqueProductId) {
+  fetch(`/product/${uniqueProductId}`, {
+      method: 'DELETE',
+  })
+  .then(response => response.json())
+  .then(data => {
+      console.log('Product deleted:', data);
 
-        // Show an alert box with the success message
-        alert(`Product with ID ${uniqueProductId} deleted successfully.`);
+      // Show an alert box with the success message
+      alert(`Product with ID ${uniqueProductId} deleted successfully.`);
 
-        // Reload the current page after showing the alert
-        location.reload();  // This reloads the page
-    })
-    .catch(error => {
-        console.error('Error deleting product:', error);
-    });
+      // Reload the current page after showing the alert
+      location.reload();  // This reloads the page
+  })
+  .catch(error => {
+      console.error('Error deleting product:', error);
+  });
 }
 
- document.addEventListener("DOMContentLoaded", async () => {
-    try {
-        let response = await fetch("http://localhost:8080/product", {
-            method: "GET",
-            credentials: "include", // ✅ JWT Cookie automatically send hoga
-        });
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+      let response = await fetch("http://localhost:8080/product", {
+          method: "GET",
+          credentials: "include", // ✅ JWT Cookie automatically send hoga
+      });
 
-        if (response.status === 401) {
-            console.log("🚫 Unauthorized! Redirecting to Login...");
-            window.location.href = "/login";
-        } else {
-            console.log("✅ Authorized! Showing Product Page...");
-        }
-    } catch (error) {
-        console.error("⚠️ Error fetching product:", error);
-    }
+      if (response.status === 401) {
+          console.log("🚫 Unauthorized! Redirecting to Login...");
+          window.location.href = "/login";
+      } else {
+          console.log("✅ Authorized! Showing Product Page...");
+      }
+  } catch (error) {
+      console.error("⚠️ Error fetching product:", error);
+  }
 });
 
 

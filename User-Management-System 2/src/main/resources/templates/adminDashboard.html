@@ -6,6 +6,25 @@
     <title>Admin Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
+<style>
+    .backButton {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+}
+
+.backButton:hover {
+    background-color: #5a6268;
+}
+
+</style>
 <body class="bg-gray-100">
 <div class="min-h-screen flex flex-col items-center justify-center p-6">
     <h1 class="text-3xl font-bold mb-6 text-gray-800">Admin Dashboard</h1>
@@ -20,24 +39,12 @@
         </a>
     </div>
 </div>
-<script>
-   <!-- document.addEventListener("DOMContentLoaded", async () => {
-      try {
-          let response = await fetch("http://localhost:8080/admin-dashboard", {
-              method: "GET",
-              credentials: "include", // ✅ JWT Cookie automatically send hoga
-          });
+<button class="backButton" onclick="goBack()">← Back</button>
 
-          if (response.status === 401) {
-              console.log("🚫 Unauthorized! Redirecting to Login...");
-              window.location.href = "/login";
-          } else {
-              console.log("✅ Authorized! Showing Product Page...");
-          }
-      } catch (error) {
-          console.error("⚠️ Error fetching product:", error);
-      }
-  });-->
+<script>
+    function goBack() {
+     window.history.back();
+   }
 
 </script>
 </body>
