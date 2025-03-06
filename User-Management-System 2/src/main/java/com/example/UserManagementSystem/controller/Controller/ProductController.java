@@ -4,6 +4,7 @@ import com.example.UserManagementSystem.dto.ProductRequest;
 import com.example.UserManagementSystem.dto.ProductResponse;
 import com.example.UserManagementSystem.dto.VariantResponse;
 import com.example.UserManagementSystem.entities.Category;
+import com.example.UserManagementSystem.entities.Product;
 import com.example.UserManagementSystem.service.CategoryService;
 import com.example.UserManagementSystem.service.ProductService;
 import com.example.UserManagementSystem.service.VariantService;
@@ -44,12 +45,50 @@ public class ProductController {
     @Autowired
     private  ObjectMapper objectMapper;
 
+  /*  @GetMapping("/searchProduct")
+    public String searchProducts(
+            @RequestParam(required = false) String searchValue,
+            @RequestParam(required = false) String category,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size,
+            Model model) {
+
+        Page<ProductResponse> productPage = productService.searchProduct(searchValue, category, page, size);
+
+        model.addAttribute("products", productPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", productPage.getTotalPages());
+        model.addAttribute("searchValue", searchValue);
+        model.addAttribute("category", category);
+
+        return "hone";
+    }*/
+  @GetMapping("/searchProduct")
+  @ResponseBody
+  public List<ProductResponse> searchProducts(@RequestParam String search,
+                                              @RequestParam String category,
+                                              @RequestParam(defaultValue = "0") int page,
+                                              @RequestParam(defaultValue = "8") int size) {
+      return productService.searchProduct(search, category, page, size).getContent();
+  }
 
 
+
+    @GetMapping("/productDetails/{id}")
+    public String showProductDetails(@PathVariable Long id, Model model) {
+
+        ProductResponse product = productService.getProductById(id);
+        if (product == null) {
+            return "redirect:/";
+        }
+        log.info("Variant set in Product Response "+ product.variantSet());
+        model.addAttribute("product", product);
+        return "productDetails";
+    }
 
     @GetMapping("/product")
     public String readProductData(@RequestParam(defaultValue = "0") int page,
-                                  @RequestParam(defaultValue = "5") int size,
+                                  @RequestParam(value = "size", defaultValue = "5") int size,
                                   @RequestParam(defaultValue = "uniqueProductId") String field,
                                   @RequestParam(defaultValue = "desc") String orderBy,
                                   @RequestParam(required = false) Long uniqueProductId,
@@ -60,6 +99,7 @@ public class ProductController {
                                   @RequestParam(required = false) Long minPrice,
                                   @RequestParam(required = false) Long maxPrice,
                                   Model model) {
+        int pageSize = size;
         Page<ProductResponse> productResponses = productService.findByCriteria(page, size, field, orderBy, uniqueProductId, categoryId, productName, categoryName, variant,minPrice,maxPrice);
         List<Category> categories = categoryService.getAllCategories();
         List<ProductResponse> products = productResponses.getContent();
@@ -75,27 +115,6 @@ public class ProductController {
 
     private final String UPLOAD_DIR = System.getProperty("user.dir") + "/uploads/";
 
-    @GetMapping("/api/images/view/{imageName}")
-    public ResponseEntity<Resource> getImage(@PathVariable String imageName) throws IOException {
-        Path imagePath = Paths.get(System.getProperty("user.dir") + "/uploads", imageName);
-
-        if (!Files.exists(imagePath)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(null);
-        }
-
-        Resource resource = new UrlResource(imagePath.toUri());
-        String contentType = Files.probeContentType(imagePath);
-
-        if (contentType == null) {
-            contentType = "application/octet-stream"; // Fallback
-        }
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + imageName + "\"")
-                .contentType(MediaType.parseMediaType(contentType))
-                .body(resource);
-    }
 
 
     @GetMapping("/variants/{id}")

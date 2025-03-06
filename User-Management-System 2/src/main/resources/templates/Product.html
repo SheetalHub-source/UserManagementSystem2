@@ -200,7 +200,7 @@
             <label for="pageNumber">Page Number:</label>
             <input type="number" id="pageNumber" placeholder="Page Number" min="1" name="pageNumber">
             <label for="pageSize">Page Size:</label>
-            <input type="number" id="pageSize" placeholder="Page Size" min="1" value="10" name="pageSize">
+            <input type="number" id="pageSize" placeholder="Page Size" min="1" value="5" name="pageSize">
             <button onclick="searchProducts()">Search</button>
         </div>
         <button class="create-btn" onclick="openForm()">  + Create Product</button>
@@ -336,14 +336,23 @@
     function goBack() {
   window.history.back();
 }
-  function goToPage(button) {
-   let page = button.getAttribute("data-page");
-   let size = button.getAttribute("data-size");
-   let field = button.getAttribute("data-field");
-   let order = button.getAttribute("data-order");
+   document.addEventListener("DOMContentLoaded", function() {
+      function goToPage(button) {
+         let page = button.getAttribute("data-page");
+         let size = button.getAttribute("data-size");
+         let field = button.getAttribute("data-field");
+         let order = button.getAttribute("data-order");
 
-   window.location.href = `?page=${page}&size=${size}&field=${field}&orderBy=${order}`;
-}
+         window.location.href = `?page=${page}&size=${size}&field=${field}&orderBy=${order}`;
+      }
+
+      // Attach event listeners dynamically
+      document.querySelectorAll('.pagination button').forEach(button => {
+         button.addEventListener("click", function() {
+            goToPage(this);
+         });
+      });
+   });
 
 //Search Products
 function searchProducts() {
@@ -558,7 +567,9 @@ function submitForm(event) {
   .then(data => {
       console.log("Response:", data);
       alert("Product Created Successfully!"); // Success message
-      closeForm(); // Modal close function
+      closeForm();
+
+       location.reload();// Modal close function
   })
   .catch(error => console.error("Error:", error));
 }

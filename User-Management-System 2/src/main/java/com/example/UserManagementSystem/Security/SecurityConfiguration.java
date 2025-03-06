@@ -31,7 +31,7 @@ public class SecurityConfiguration {
         httpSecurity
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/login", "/signup", "/failed", "/loginpage", "/", "/home", "/index").permitAll()
+                        .requestMatchers("/login", "/signup", "/failed", "/loginpage", "/", "/home", "/index","/api/images/view/**","/productDetails/**","/searchProduct").permitAll()
                         .requestMatchers("/admin-dashboard", "/product/**", "/category/**").hasAnyRole("ADMIN", "SUPERADMIN")
                         .requestMatchers("/api/admin/**", "/superadmin-dashboard").hasRole("SUPERADMIN")
                         .anyRequest().authenticated()

@@ -1,120 +1,378 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Home Page</title>
+  <title>E-Commerce Home</title>
   <style>
+    /* Reset default styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Arial', sans-serif;
+}
+
+/* Header Styling */
+.header {
+  background: #6f90c9;
+  padding: 15px 0;
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+}
+
+/* Navbar Container */
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Logo */
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+  color: #fff;
+}
+
+/* Search Bar */
+.search-container {
+  display: flex;
+  align-items: center;
+}
+
+.search-bar {
+  width: 300px;
+  padding: 10px;
+  font-size: 16px;
+  border: 2px solid #ccc;
+  border-radius: 20px;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.search-bar:focus {
+  border-color: #007bff;
+}
+
+.search-btn {
+  margin-left: 10px;
+  padding: 8px 12px;
+  font-size: 16px;
+  background-color: #fff;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.search-btn:hover {
+  background-color: #0056b3;
+}
+
+/* Navigation Links */
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.nav-links li {
+  display: flex;
+  align-items: center;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: #333;
+  font-size: 16px;
+  font-weight: bold;
+  transition: color 0.3s ease;
+}
+
+.nav-links a:hover {
+  color: #007bff;
+}
+
+/* Category Dropdown */
+.category-dropdown {
+  padding: 8px;
+  font-size: 16px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  background: #fff;
+  cursor: pointer;
+}
+
+/* Icons Styling */
+.nav-links i {
+  margin-right: 5px;
+  font-size: 18px;
+}
+
     body {
-        font-family: Arial, sans-serif;
-        margin: 20px;
-        background-color: #f4f4f4;
+        font-family: 'Roboto', sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f1f1f1;
+        color: #333;
     }
     .container {
-        max-width: 1200px;
-        margin: auto;
-        padding: 20px;
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        width: 80%;
+        margin: 40px auto;
     }
-    .search-bar, .sort-options {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 20px;
-    }
-    .search-bar input, .sort-options select, .sort-options button {
-        padding: 8px;
+    .search-bar {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 30px;
+        border: 2px solid #ccc;
+        border-radius: 5px;
         font-size: 16px;
+        outline: none;
+    }
+    .search-bar:focus {
+        border-color: #007bff;
     }
     .product-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
         gap: 20px;
+        margin-top: 20px;
     }
-    .product-card {
-        padding: 15px;
-        background: #fff;
-        border: 1px solid #ddd;
-        border-radius: 5px;
+    .product {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         text-align: center;
+        opacity: 0;
+        transform: translateY(30px);
+        animation: fadeInUp 0.5s forwards;
     }
+    .product img {
+        width: 100%;
+        height: 200px;
+        object-fit: contain;
+        border-radius: 10px;
+    }
+    .product p {
+        font-size: 18px;
+        font-weight: bold;
+        margin-top: 15px;
+    }
+    .pagination {
+        text-align: center;
+        margin-top: 30px;
+    }
+    .pagination button {
+        padding: 10px 20px;
+        margin: 5px;
+        border: none;
+        background: #007bff;
+        color: white;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background 0.3s ease;
+    }
+    .pagination button:hover {
+        background: #0056b3;
+    }
+    .pagination button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+    }
+
+    @keyframes fadeInUp {
+        0% {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+.pagination button {
+    padding: 8px 12px;
+    margin: 0 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #007bff;
+    color: white;
+}
+
+.pagination button:hover {
+    background-color: #0056b3;
+}
+
+.pagination .active {
+    background-color: #28a745;
+}
   </style>
 </head>
 <body>
+
+<header class="header">
+  <nav class="nav-container">
+    <!-- Logo -->
+    <div class="logo">MyShop</div>
+
+    <!-- Search Bar -->
+    <div class="search-container">
+      <input type="text" class="search-bar" id="search" placeholder="Search for products...">
+      <button id="searchProducts" class="search-btn">🔍</button>
+    </div>
+
+    <!-- Navigation Links -->
+    <ul class="nav-links">
+      <li><a href="#">Home</a></li>
+      <li>
+        <select id="searchCategory" class="category-dropdown">
+          <option value="">All Categories</option>
+          <option th:each="category : ${categories}" th:value="${category.categoryName}" th:text="${category.categoryName}"></option>
+        </select>
+      </li>
+      <li><a href="http://localhost:8080/loginpage"><i class="fas fa-user"></i> Login</a></li>
+      <li><a href="/cart"><i class="fas fa-shopping-cart"></i> Cart</a></li>
+    </ul>
+  </nav>
+</header>
+
+
 <div class="container">
-  <h2>Product List</h2>
-  <div class="search-bar">
-    <input type="text" id="search" placeholder="Search by name, category, variant...">
-  </div>
-  <div class="sort-options">
-    <select id="sortBy">
-      <option value="productName">Sort by Product Name</option>
-      <option value="price">Sort by Price</option>
-      <option value="createdAt">Sort by Created At</option>
-      <option value="updatedAt">Sort by Updated At</option>
-    </select>
-    <select id="order">
-      <option value="asc">Ascending</option>
-      <option value="desc">Descending</option>
-    </select>
-    <button onclick="fetchProducts()">Apply</button>
-  </div>
   <div class="product-grid" id="productGrid">
-    <!-- Products will be dynamically added here -->
+    <div th:each="product : ${products}" class="product">
+      <a th:href="@{/productDetails/{id}(id=${product.uniqueProductId})}" style="text-decoration: none; color: inherit;">
+        <img th:src="@{${product.productImage}}" th:alt="${product.productName}">
+        <p th:text="${product.uniqueProductId}"></p>
+        <p th:text="${product.productName}"></p>
+        <p th:text="'Rs. ' + ${product.price}"></p>
+        <p th:text="'Category: ' + ${product.categoryName}"></p>
+        <p th:text="'Desc: ' + ${product.productDesc}"></p>
+      </a>
+    </div>
   </div>
+  <div class="pagination">
+    <!-- Previous Button -->
+    <button th:if="${currentPage > 0}"
+            th:data-page="${currentPage - 1}"
+            th:data-size="${size}"
+            th:data-field="${sortField}"
+            th:data-order="${sortDirection}"
+            onclick="goToPage(this)">
+      Previous
+    </button>
+
+    <!-- Page Numbers -->
+    <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+      <button th:text="${i}"
+              th:classappend="${i == currentPage} ? 'active'"
+              th:data-page="${i}"
+              th:data-size="${size}"
+              th:data-field="${sortField}"
+              th:data-order="${sortDirection}"
+              onclick="goToPage(this)">
+      </button>
+    </th:block>
+
+    <!-- Next Button -->
+    <button th:if="${currentPage < totalPages - 1}"
+            th:data-page="${currentPage + 1}"
+            th:data-size="${size}"
+            th:data-field="${sortField}"
+            th:data-order="${sortDirection}"
+            onclick="goToPage(this)">
+      Next
+    </button>
+  </div>
+
 </div>
+
 <script>
-  async function fetchProducts() {
-      const searchQuery = document.getElementById('search').value;
-      const sortBy = document.getElementById('sortBy').value;
-      const order = document.getElementById('order').value;
+  function goToPage(button) {
+   let page = button.getAttribute("data-page");
+   let size = button.getAttribute("data-size")||8;
+   let field = button.getAttribute("data-field");
+   let order = button.getAttribute("data-order");
 
-      const response = await fetch(`http://localhost:8080/products?search=${searchQuery}&sortBy=${sortBy}&order=${order}`);
-      const products = await response.json();
+   window.location.href = `?page=${page}&size=${size}&field=${field}&orderBy=${order}`;
+}
+document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById("searchProducts").addEventListener("click", searchProducts);
+})
+    function searchProducts() {
+    let searchValue = document.getElementById("search").value.trim();
+    let categoryValue = document.getElementById("searchCategory").value;
 
-      const productGrid = document.getElementById('productGrid');
-      productGrid.innerHTML = '';
+    let url = `/searchProduct?search=${encodeURIComponent(searchValue)}&category=${encodeURIComponent(categoryValue)}`;
 
-      products.slice(0, 6).forEach(product => {
-          const productCard = document.createElement('div');
-          productCard.classList.add('product-card');
-          productCard.innerHTML = `
-              <h3>${product.productName}</h3>
-              <p>Category: ${product.category}</p>
-              <p>Price: $${product.price}</p>
-          `;
-          productGrid.appendChild(productCard);
-      });
+    fetch(url)
+        .then(response => response.json()) // ✅ Expect JSON instead of HTML
+        .then(products => {
+            console.log("Fetched Products:", products); // ✅ Log response
+
+            let productGrid = document.getElementById("productGrid");
+            productGrid.innerHTML = ""; // Clear existing products
+
+            if (products.length === 0) {
+                productGrid.innerHTML = "<p>No products found.</p>"; // ✅ Show message if empty
+                return;
+            }
+
+            products.forEach(product => {
+                let productElement = document.createElement("div");
+                productElement.classList.add("product");
+
+                productElement.innerHTML = `
+                    <a href="/productDetails/${product.uniqueProductId}" style="text-decoration: none; color: inherit;">
+                        <img src="${product.productImage}" alt="${product.productName}">
+                         <p>${product.uniqueProductId}</p>
+                        <p>${product.productName}</p>
+                        <p>Rs. ${product.price}</p>
+                        <p>Category: ${product.categoryName}</p>
+                        <p>Desc: ${product.productDesc}</p>
+                    </a>
+                `;
+
+                productGrid.appendChild(productElement);
+            });
+        })
+        .catch(error => {
+            console.error("❌ Error fetching products:", error);
+        });
+}
+
+  function displayProducts(products) {
+    let productGrid = document.getElementById("productGrid");
+    productGrid.innerHTML = ""; // Clear current products
+
+    products.forEach(product => {
+      let productElement = document.createElement("div");
+      productElement.classList.add("product");
+
+      productElement.innerHTML = `
+        <a href="/productDetails/${product.uniqueProductId}" style="text-decoration: none; color: inherit;">
+          <img src="${product.productImage}" alt="${product.productName}">
+          <p>${product.productName}</p>
+          <p>Rs. ${product.price}</p>
+          <p>Category: ${product.categoryName}</p>
+          <p>Desc: ${product.productDesc}</p>
+        </a>
+      `;
+
+      productGrid.appendChild(productElement);
+    });
   }
-  document.getElementById('search').addEventListener('input', fetchProducts);
-
-
-  async function checkAuth() {
-     try {
-         let response = await fetch("http://localhost:8080/validate-token", {
-             method: "GET",
-             credentials: "include"  // ✅ Ensures cookies are sent
-         });
-
-         let data = await response.json();
-         console.log("JWT Validation Response:", data);
-
-         if (response.status === 401 || data.status === "invalid") {
-             console.log("🚫 Invalid JWT! Redirecting to Login...");
-             window.location.href = "/login";
-         } else {
-             console.log("✅ JWT Valid! Access Granted.");
-         }
-     } catch (error) {
-         console.error("⚠️ Error Validating JWT:", error);
-         window.location.href = "/login";
-     }
- }
-
- // ✅ Call `checkAuth()` when page loads
- checkAuth();
-
 </script>
 </body>
 </html>

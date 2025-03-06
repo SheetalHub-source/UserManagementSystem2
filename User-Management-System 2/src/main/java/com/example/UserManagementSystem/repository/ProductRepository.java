@@ -48,4 +48,7 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
     @Query("SELECT p.id FROM Product p WHERE p.uniqueProductId = :uniqueProductId")
     Long findIdByUniqueProductId(@Param("uniqueProductId") Long uniqueProductId);
 
+    Product findByProductDesc(String productDesc);
+
+    Product findByProductName(String searchValue);
 }

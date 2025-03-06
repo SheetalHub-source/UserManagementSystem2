@@ -36,6 +36,9 @@ public class ProductSpecification {
             return criteriaBuilder.conjunction(); // Returns all products if no price filters are applied
         };
     }
-
+    public static Specification<Product> hasProductNameLike(String name) {
+        return (root, query, criteriaBuilder) ->
+                criteriaBuilder.like(criteriaBuilder.lower(root.get("productName")), "%" + name.toLowerCase() + "%");
+    }
 
 }

@@ -44,37 +44,36 @@ public class ProductService {
 //
 
 
-    public Long findProductIdByUniqueProductId(Long uniqueProductId){
-       return productRepository.findIdByUniqueProductId(uniqueProductId);
+    public Long findProductIdByUniqueProductId(Long uniqueProductId) {
+        return productRepository.findIdByUniqueProductId(uniqueProductId);
     }
 
-    public ProductResponse findByUniqueProductId(Long uniqueProductId){
-        Product product=  productRepository.findByUniqueProductId(uniqueProductId).get();
+    public ProductResponse findByUniqueProductId(Long uniqueProductId) {
+        Product product = productRepository.findByUniqueProductId(uniqueProductId).get();
         return convertToProductResponse(product);
     }
+
     private String saveImage(MultipartFile image) throws IOException {
-         final String UPLOAD_DIR = System.getProperty("user.dir")+"/uploads";
-            File uploadDir = new File(UPLOAD_DIR);
-            if (!uploadDir.exists()) uploadDir.mkdirs();
+        final String UPLOAD_DIR = System.getProperty("user.dir") + "/uploads";
+        File uploadDir = new File(UPLOAD_DIR);
+        if (!uploadDir.exists()) uploadDir.mkdirs();
 
         String uniqueFileName = UUID.randomUUID() + "_" + image.getOriginalFilename().replaceAll("\\s", "");
         String filePath = Paths.get(UPLOAD_DIR, uniqueFileName).toString();
         image.transferTo(new File(filePath));
 
-            String imageUrl = "http://localhost:8080/api/images/view/" + uniqueFileName;
-            return imageUrl;
+        String imageUrl = "http://localhost:8080/api/images/view/" + uniqueFileName;
+        return imageUrl;
     }
 
 
-    public ProductResponse
-    createOrUpdateProductWithVariant(ProductRequest productRequest, MultipartFile productImage, MultipartFile[] variantImage) throws Exception {
+    public ProductResponse createOrUpdateProductWithVariant(ProductRequest productRequest, MultipartFile productImage, MultipartFile[] variantImage) throws Exception {
 
         List<String> error = new ArrayList<>();
 
         if (variantImage == null && productRequest.variantSet() != null && !productRequest.variantSet().isEmpty()) {
             error.add("Missing Image field for variant Image. There should be " + productRequest.variantSet().size() + " Variant Images");
-        } else if (variantImage != null && productRequest.variantSet() != null &&
-                variantImage.length < productRequest.variantSet().size()) {
+        } else if (variantImage != null && productRequest.variantSet() != null && variantImage.length < productRequest.variantSet().size()) {
             error.add("Missing Image field for variant Image. There should be " + productRequest.variantSet().size() + " Variant Images");
         }
 
@@ -100,8 +99,7 @@ public class ProductService {
 //        String imageBase64 = encodeImageToBase64(productImage);
         String imageUrl = saveImage(productImage);
 
-        Product product = (productRequest.uniqueProductId() == null) ? new Product() :
-                productRepository.findByUniqueProductId(productRequest.uniqueProductId()).get();
+        Product product = (productRequest.uniqueProductId() == null) ? new Product() : productRepository.findByUniqueProductId(productRequest.uniqueProductId()).get();
 
         if (product == null && productRequest.uniqueProductId() != null) {
             throw new ResourceNotFoundException("Product with ID " + productRequest.uniqueProductId() + " not found.");
@@ -130,75 +128,58 @@ public class ProductService {
                 }
             }
             ObjectMapper objectMapper = new ObjectMapper();
-            Set<Variant> variants = variantResponses.stream()
-                    .map(variantResponse -> {
-                        Variant variant = new Variant();
-                        variant.setUniqueId(variantResponse.uniqueId());
+            Set<Variant> variants = variantResponses.stream().map(variantResponse -> {
+                Variant variant = new Variant();
+                variant.setUniqueId(variantResponse.uniqueId());
 
-                        try {
-                            // ✅ Convert optionsData (list) to JSON string
-                            String optionsDataJson = objectMapper.writeValueAsString(variantResponse.attribute());
-                            variant.setOptionsData(optionsDataJson);
-                        } catch (Exception e) {
-                            throw new RuntimeException("Error converting optionsData to JSON", e);
-                        }
+                try {
+                    // ✅ Convert optionsData (list) to JSON string
+                    String optionsDataJson = objectMapper.writeValueAsString(variantResponse.attribute());
+                    variant.setOptionsData(optionsDataJson);
+                } catch (Exception e) {
+                    throw new RuntimeException("Error converting optionsData to JSON", e);
+                }
 
-                        variant.setImage(variantResponse.imageData()); // Assuming `image` exists in VariantResponse
-                        return variant;
-                    })
-                    .collect(Collectors.toSet());
+                variant.setImage(variantResponse.imageData()); // Assuming `image` exists in VariantResponse
+                return variant;
+            }).collect(Collectors.toSet());
 
             savedProduct.setVariantSet(variants);
         }
         // Save the product and return response
         return convertToProductResponse(savedProduct);
     }
-    ProductResponse convertToProductResponse(Product product) {
-        Set<VariantResponse> variantResponses = product.getVariantSet()
-                .stream()
-                .map(variant -> new VariantResponse(variant.getUniqueId(),variant.getOptionsData(),variant.getImage()))
-                .collect(Collectors.toSet());
-        return new ProductResponse(
-                product.getId(),
-                product.getUniqueProductId(),
-                product.getProductName(),
-                product.getProductDesc(),
-                product.getPrice(),
-                product.getImageData(),
-                product.getCategryName(),
-                product.getCreatedAt(),
-                product.getUpdatedAt(),
-                variantResponses
-        );
-    }
-    public Map<String, Object> deleteProductOrVariants(Long uniqueProductId, Long[] variantIds) {
-        Product product = productRepository.findByUniqueProductId(uniqueProductId).
-                orElseThrow(()->new ResourceNotFoundException("Product with Unique Product Id " + uniqueProductId + " is not present." +
-                        ""));
-        Map<String, Object> result = new HashMap<>();
-       // log.info("VariantIds list before going into the condition: " + Arrays.toString(variantIds));
 
-        if (variantIds!=null&&variantIds.length != 0) {
+    ProductResponse convertToProductResponse(Product product) {
+        Set<VariantResponse> variantResponses = product.getVariantSet().stream().map(variant -> new VariantResponse(variant.getUniqueId(), variant.getOptionsData(), variant.getImage())).collect(Collectors.toSet());
+        return new ProductResponse(product.getId(), product.getUniqueProductId(), product.getProductName(), product.getProductDesc(), product.getPrice(), product.getImageData(), product.getCategryName(), product.getCreatedAt(), product.getUpdatedAt(), variantResponses);
+    }
+
+    public Map<String, Object> deleteProductOrVariants(Long uniqueProductId, Long[] variantIds) {
+        Product product = productRepository.findByUniqueProductId(uniqueProductId).orElseThrow(() -> new ResourceNotFoundException("Product with Unique Product Id " + uniqueProductId + " is not present." + ""));
+        Map<String, Object> result = new HashMap<>();
+        // log.info("VariantIds list before going into the condition: " + Arrays.toString(variantIds));
+
+        if (variantIds != null && variantIds.length != 0) {
             List<String> messages = new ArrayList<>();
             for (Long id : variantIds) {
                 messages.addAll(variantService.deleteVariants(id, uniqueProductId));
             }
             result.put("Result", messages);
-        }
-        else {
+        } else {
             log.info("Else block called here ");
             productRepository.delete(product);
-            result.put("message", "Product with unique product Id "+uniqueProductId+" deleted successfully.");
+            result.put("message", "Product with unique product Id " + uniqueProductId + " deleted successfully.");
         }
 
         return result;
     }
 
 
-    public Page<ProductResponse> findByCriteria(int page, int size, String sortBy, String order, Long uniqueProductId, Long categoryId, String productName, String categoryName,String optionsData,Long minPrice,Long maxPrice) {
+    public Page<ProductResponse> findByCriteria(int page, int size, String sortBy, String order, Long uniqueProductId, Long categoryId, String productName, String categoryName, String optionsData, Long minPrice, Long maxPrice) {
         List<String> errors = new ArrayList<>();
 
-        if (page <0) {
+        if (page < 0) {
             errors.add("Page number should be positive");
         }
         if (size <= 0) {
@@ -219,31 +200,29 @@ public class ProductService {
         if (categoryName != null && !productRepository.existsByCategory_CategoryName(categoryName)) {
             errors.add("No products are present with this category");
         }
-        if(optionsData!=null&&!productRepository.existsByVariantOptions(optionsData)){
+        if (optionsData != null && !productRepository.existsByVariantOptions(optionsData)) {
             errors.add("No products present with this variant data");
         }
         if (minPrice != null && maxPrice != null && minPrice > maxPrice) {
             errors.add("Invalid range: minPrice cannot be greater than maxPrice.");
-        }
-        else if (minPrice == null && maxPrice != null) {
+        } else if (minPrice == null && maxPrice != null) {
             minPrice = productRepository.findMinPrice();
         } else if (maxPrice == null && minPrice != null) {
             maxPrice = productRepository.findMaxPrice();
         }
 
 
-
         if (!errors.isEmpty()) {
             throw new CustomValidationException(errors);
         }
-        Pageable pageable= PageRequest.of(page,size,Sort.by(Sort.Direction.fromString(order),sortBy));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(order), sortBy));
         ;
         Specification<Product> spec = Specification.where(null);
         if (uniqueProductId != null) {
             spec = spec.and(ProductSpecification.hasUniqueProductId(uniqueProductId));
         }
-        if(categoryId!=null){
-           spec = spec.and(ProductSpecification.hasCategoryId(categoryId)) ;
+        if (categoryId != null) {
+            spec = spec.and(ProductSpecification.hasCategoryId(categoryId));
         }
         if (StringUtils.hasLength(categoryName)) {
             spec = spec.and(ProductSpecification.hasCategoryName(categoryName));
@@ -260,4 +239,34 @@ public class ProductService {
         Page<Product> productPage = productRepository.findAll(spec, pageable);
         return productPage.map(this::convertToProductResponse);
     }
+
+    public ProductResponse getProductById(Long id) {
+        Product product = productRepository.findByUniqueProductId(id).get();
+        log.info("Variant set of the product is " + product.getVariantSet());
+        return convertToProductResponse(product);
+
+    }
+
+    public Page<ProductResponse> searchProduct(String searchValue, String category, int page, int size) {
+        Specification<Product> spec = Specification.where(null);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "uniqueProductId"));
+
+        if (StringUtils.hasLength(searchValue)) {
+            if (searchValue.matches("^\\d+$")) {
+                spec = spec.or(ProductSpecification.hasUniqueProductId(Long.valueOf(searchValue)));
+            }
+
+            spec = spec.or(ProductSpecification.hasProductNameLike(searchValue));
+
+
+        }
+
+        if (StringUtils.hasLength(category)) {
+            spec = spec.and(ProductSpecification.hasCategoryName(category));
+        }
+
+        Page<Product> productPage = productRepository.findAll(spec, pageable);
+        return productPage.map(this::convertToProductResponse);
+    }
+
 }
