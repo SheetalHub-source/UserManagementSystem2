@@ -6,6 +6,7 @@ import com.example.UserManagementSystem.resultGenericClass.GenericResponse;
 import com.example.UserManagementSystem.service.CategoryService;
 import com.example.UserManagementSystem.service.ProductService;
 import com.example.UserManagementSystem.service.UserService;
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -65,7 +66,7 @@ public class AdminController {
 
     @PostMapping
     @ResponseBody
-    public GenericResponse<UserResponse> createAdmin( @Valid @RequestBody UserRequest userRequest){
+    public GenericResponse<UserResponse> createAdmin( @Valid @RequestBody UserRequest userRequest) throws MessagingException {
         System.out.println("Received UserRequest: " + userRequest);
         UserResponse userResponse =  userService.createAndUpdateUser(userRequest);
         if(userRequest.uniqueId()==null) {

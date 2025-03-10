@@ -1,6 +1,5 @@
-package com.example.UserManagementSystem.entities;
+package com.example.UserManagementSystem.Model;
 
-import com.example.UserManagementSystem.dto.VariantRequest;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;

@@ -5,33 +5,43 @@ import com.example.UserManagementSystem.ExceptionHandling.ResourceNotFoundExcept
 import com.example.UserManagementSystem.Specification.UserSpecification;
 import com.example.UserManagementSystem.dto.UserRequest;
 import com.example.UserManagementSystem.dto.UserResponse;
-import com.example.UserManagementSystem.entities.Users;
+import com.example.UserManagementSystem.Model.Users;
 import com.example.UserManagementSystem.repository.UserRepository;
+import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class UserService {
     @Autowired
     private UserRepository userRepo;
-    private final PasswordEncoder passwordEncoder;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     UserSpecification userSpecification;
+    @Autowired
+    private EmailService emailService;
 
-    public UserService(PasswordEncoder passwordEncoder) {
-        this.passwordEncoder = passwordEncoder;
-    }
+    public UserResponse createAndUpdateUser(UserRequest userRequest) throws MessagingException {
 
-    public UserResponse createAndUpdateUser(UserRequest userRequest) {
+        String token = null;
+        LocalDateTime expiryTime = null;
+        if (userRequest.role().equalsIgnoreCase("USER")) {
+            token = UUID.randomUUID().toString();
+            expiryTime = LocalDateTime.now().plusHours(24);
+        }
         if (userRequest.uniqueId() == null) {
             List<String> errors = new ArrayList<>();
             if (userRepo.existsByEmail(userRequest.email())) {
@@ -41,13 +51,24 @@ public class UserService {
             if (!errors.isEmpty()) {
                 throw new CustomValidationException(errors);
             }
-            Users user = new Users(userRequest.userName(), passwordEncoder.encode(userRequest.password()), userRequest.email(), userRequest.role().toUpperCase());
+
+            Users user = new Users(
+                    userRequest.userName()
+                    , passwordEncoder.encode(userRequest.password())
+                    , userRequest.email()
+                    , userRequest.role().toUpperCase()
+                    , token
+                    , expiryTime
+            );
             userRepo.save(user);
+            if (userRequest.role().equalsIgnoreCase("USER")) {
+                emailService.sendVerificationEmail(user.getEmail(), token);
+            }
             return convertToDto(user);
         } else {
             Users existingUser = userRepo.findByUniqueId(userRequest.uniqueId());
             if (existingUser == null) {
-                new ResourceNotFoundException("No account available with this unique ID");
+                throw new ResourceNotFoundException("No account available with this unique ID");
             }
 
             List<String> errors = validateUserRequest(userRequest);
@@ -57,12 +78,18 @@ public class UserService {
 
             existingUser.setUserName(userRequest.userName());
             existingUser.setPassword(passwordEncoder.encode(userRequest.password()));
-           // existingUser.setPassword(userRequest.password()); // Consider encrypting password2
             existingUser.setEmail(userRequest.email());
             existingUser.setRole(userRequest.role().toUpperCase());
-            // existingUser.setUserName(userRequest.userName());
+            if (userRequest.role().equalsIgnoreCase("USER")) {
+                existingUser.setVerificationToken(token);
+                existingUser.setTokenExpiry(expiryTime);
+                existingUser.setActive(false); // Ensure they verify again after role update
+            }
 
             userRepo.save(existingUser);
+            if (userRequest.role().equalsIgnoreCase("USER")) {
+                emailService.sendVerificationEmail(existingUser.getEmail(), token);
+            }
             return convertToDto(existingUser);
         }
     }
@@ -100,7 +127,7 @@ public class UserService {
         return new UserResponse(user.getUniqueId(), user.getUserName(), user.getEmail(), user.getPassword());
     }
 
-    public  Page<UserResponse> getAllUsers(int page, int size, String order, String uniqueId, String userName, String email, String field, String role) {
+    public Page<UserResponse> getAllUsers(int page, int size, String order, String uniqueId, String userName, String email, String field, String role) {
         List<String> errors = new ArrayList<>();
 
         // Validate Unique ID
@@ -180,8 +207,45 @@ public class UserService {
         return "Admin deleted successfully.";
     }
 
-    public Users findByEmail(String email){
-       return userRepo.findByEmail(email).get();
+    public Users findByEmail(String email) {
+        return userRepo.findByEmail(email).get();
+    }
+
+    public String verifyUser(String token) {
+        Users user = userRepo.findByVerificationToken(token); // Find user by token
+
+        if (user == null) {
+            return "Invalid or expired token!";
+        }
+        if (user.getTokenExpiry().isBefore(LocalDateTime.now())) {
+            return "Token expired! Request a new one.";
+        }
+
+        user.setActive(true);
+        user.setVerificationToken(null);
+        user.setTokenExpiry(null);
+        userRepo.save(user);
+
+        return "Email verified successfully! You can now log in.";
+    }
+
+    public String resendVerification(String email) throws MessagingException {
+        Users user = userRepo.findByEmail(email).get();
+
+        if (user == null) {
+            return "User not found!";
+        }
+        if (user.isActive()) {
+            return "User is already verified.";
+        }
+
+        String token = UUID.randomUUID().toString();
+        user.setVerificationToken(token);
+        user.setTokenExpiry(LocalDateTime.now().plusHours(24));
+
+        userRepo.save(user);
+        emailService.sendVerificationEmail(user.getEmail(), token);
+        return "Verification email is sent again";
     }
 
 }

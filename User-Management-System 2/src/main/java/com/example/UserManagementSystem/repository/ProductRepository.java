@@ -1,7 +1,6 @@
 package com.example.UserManagementSystem.repository;
 
-import com.example.UserManagementSystem.dto.ProductRequest;
-import com.example.UserManagementSystem.entities.Product;
+import com.example.UserManagementSystem.Model.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -9,7 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;

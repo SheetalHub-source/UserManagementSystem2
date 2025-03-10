@@ -1,6 +1,6 @@
 package com.example.UserManagementSystem.Security;
 
-import com.example.UserManagementSystem.entities.Users;
+import com.example.UserManagementSystem.Model.Users;
 import com.example.UserManagementSystem.repository.UserRepository;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;

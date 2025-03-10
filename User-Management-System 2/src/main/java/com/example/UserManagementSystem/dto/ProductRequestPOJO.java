@@ -1,9 +1,5 @@
 package com.example.UserManagementSystem.dto;
 
-import com.example.UserManagementSystem.entities.Variant;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashSet;

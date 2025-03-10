@@ -4,8 +4,8 @@ import com.example.UserManagementSystem.ExceptionHandling.ResourceNotFoundExcept
 import com.example.UserManagementSystem.dto.VariantAttributes;
 import com.example.UserManagementSystem.dto.VariantRequest;
 import com.example.UserManagementSystem.dto.VariantResponse;
-import com.example.UserManagementSystem.entities.Product;
-import com.example.UserManagementSystem.entities.Variant;
+import com.example.UserManagementSystem.Model.Product;
+import com.example.UserManagementSystem.Model.Variant;
 import com.example.UserManagementSystem.repository.VariantRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
-import java.util.List;
 import java.util.function.Function;
 
 @Component
@@ -20,7 +19,7 @@ public class JwtUtils {
     private static final String SECRET_KEY_STRING = "z4tOJN1PxvXdkRZcsh18kcRAkF7oz2yxG6eOBn8g0Ig=";
     private final SecretKey SECRET_KEY = Keys.hmacShaKeyFor(java.util.Base64.getDecoder().decode(SECRET_KEY_STRING));
 
-    public void generateTokenAndSetCookie(String username,String role, HttpServletResponse response) {
+    public String generateTokenAndSetCookie(String username, String role, HttpServletResponse response) {
         String token = Jwts.builder()
                 .setHeaderParam("typ", "JWT")
                 .setSubject(username)
@@ -36,6 +35,7 @@ public class JwtUtils {
         cookie.setMaxAge(3600); // 1 hour ke liye valid
         response.addCookie(cookie);
         //return token;
+        return token;
     }
 
     public String getTokenFromCookies(Cookie[] cookies) {

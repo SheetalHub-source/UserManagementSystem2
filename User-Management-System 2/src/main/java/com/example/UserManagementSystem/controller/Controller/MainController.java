@@ -1,17 +1,11 @@
 package com.example.UserManagementSystem.controller.Controller;
 
 import com.example.UserManagementSystem.JWT.JwtUtils;
-import com.example.UserManagementSystem.dto.AuthRequest;
 import com.example.UserManagementSystem.dto.ProductResponse;
-import com.example.UserManagementSystem.dto.UserRequest;
-import com.example.UserManagementSystem.dto.UserResponse;
-import com.example.UserManagementSystem.entities.Category;
-import com.example.UserManagementSystem.resultGenericClass.GenericResponse;
+import com.example.UserManagementSystem.Model.Category;
 import com.example.UserManagementSystem.service.CategoryService;
 import com.example.UserManagementSystem.service.ProductService;
 import com.example.UserManagementSystem.service.UserService;
-import io.jsonwebtoken.security.Keys;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -21,18 +15,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Base64;
 import java.util.List;
 
 @Controller
@@ -54,13 +45,7 @@ public class MainController {
         System.out.println("Login page controller is called ...");
         return "login";
     }
-    @GetMapping("/verify")
-    public ResponseEntity<?> verifyToken(Authentication authentication) {
-        if (authentication != null && authentication.isAuthenticated()) {
-            return ResponseEntity.ok("Token is valid");
-        }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
-    }
+
 
 @GetMapping("/home")
     public String homePage(@RequestParam(defaultValue = "0") int page,
@@ -131,5 +116,9 @@ public class MainController {
                 .body(resource);
     }
 
+    @GetMapping("/signup")
+    public String signUp(){
+        return "signup";
+    }
 
 }

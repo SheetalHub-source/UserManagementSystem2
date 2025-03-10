@@ -1,6 +1,5 @@
-package com.example.UserManagementSystem.entities;
+package com.example.UserManagementSystem.Model;
 
-import com.example.UserManagementSystem.dto.VariantAttributes;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;

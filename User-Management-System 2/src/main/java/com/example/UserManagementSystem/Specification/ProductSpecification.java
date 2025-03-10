@@ -1,7 +1,7 @@
 package com.example.UserManagementSystem.Specification;
 
-import com.example.UserManagementSystem.entities.Product;
-import com.example.UserManagementSystem.entities.Variant;
+import com.example.UserManagementSystem.Model.Product;
+import com.example.UserManagementSystem.Model.Variant;
 import jakarta.persistence.criteria.Join;
 import org.springframework.data.jpa.domain.Specification;
 

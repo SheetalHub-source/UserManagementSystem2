@@ -1,6 +1,6 @@
 package com.example.UserManagementSystem.Specification;
 
-import com.example.UserManagementSystem.entities.Users;
+import com.example.UserManagementSystem.Model.Users;
 import org.springframework.data.jpa.domain.Specification;
 
 public class UserSpecification {

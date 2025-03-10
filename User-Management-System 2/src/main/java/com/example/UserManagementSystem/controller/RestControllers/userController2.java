@@ -1,18 +1,27 @@
 package com.example.UserManagementSystem.controller.RestControllers;
 
+import com.example.UserManagementSystem.Model.Users;
 import com.example.UserManagementSystem.dto.UserRequest;
 import com.example.UserManagementSystem.dto.UserResponse;
 import com.example.UserManagementSystem.resultGenericClass.GenericResponse;
 import com.example.UserManagementSystem.service.UserService;
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
-@RestController
+@Controller
 @RequestMapping("/api/users")
+@Slf4j
 public class userController2 {
     @Autowired
     private UserService userService;
@@ -22,6 +31,7 @@ public class userController2 {
     public GenericResponse<List<UserResponse>> fetchAdmin(@RequestParam(defaultValue = "0") int page,
                                                           @RequestParam(defaultValue = "5") int size,
                                                           @RequestParam(defaultValue = "desc") String order,
+
                                                           @RequestParam(defaultValue = "uniqueId") String field,
                                                           @RequestParam(required = false) String uniqueId,
                                                           @RequestParam(required = false) String userName,
@@ -32,20 +42,26 @@ public class userController2 {
         Page<UserResponse> userResponses= userService.getAllUsers(page,size,order,uniqueId,userName,email,field,role);
         return GenericResponse.success(userResponses.getContent(),"Data fetched Successfully");
     }
+    @PostMapping("/signup")
+    @ResponseBody  // Ensures JSON response instead of HTML redirect
+    public ResponseEntity<Map<String, String>> registerUser(@RequestBody UserRequest userRequest) throws MessagingException {
+        log.info("Incoming user Request: " + userRequest);
 
+        userService.createAndUpdateUser(userRequest); // Process user signup
 
-    //Create user with role
-    @PostMapping
-    public GenericResponse<UserResponse> createAdmin( @Valid @RequestBody UserRequest userRequest){
-        System.out.println("Received UserRequest: " + userRequest);
-        UserResponse userResponse =  userService.createAndUpdateUser(userRequest);
-        if(userRequest.uniqueId()==null) {
-                return GenericResponse.success(userResponse, userRequest.role().toUpperCase() + " created successfully");
-        }
-        else {
-                return GenericResponse.success(userResponse, userRequest.role().toUpperCase() + " updated successfully");
-            }
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Account created successfully! Check your email to verify your account.");
+
+        return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/resend-verification")
+    public ResponseEntity<String> resendVerificationEmail(@RequestParam("email") String email) throws MessagingException {
+        String message = userService.resendVerification(email);
+        return ResponseEntity.ok("New verification email sent!");
+    }
+
+
 
 
 

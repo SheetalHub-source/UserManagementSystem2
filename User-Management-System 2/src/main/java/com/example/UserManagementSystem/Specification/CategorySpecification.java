@@ -1,7 +1,6 @@
 package com.example.UserManagementSystem.Specification;
 
-import com.example.UserManagementSystem.entities.Category;
-import com.example.UserManagementSystem.entities.Users;
+import com.example.UserManagementSystem.Model.Category;
 import org.springframework.data.jpa.domain.Specification;
 
 public class CategorySpecification {

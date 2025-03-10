@@ -1,6 +1,8 @@
-package com.example.UserManagementSystem.entities;
+package com.example.UserManagementSystem.Model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -43,15 +45,28 @@ public class Users {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    public Users(String userName, String password, String email,String role) {
+    private boolean isActive = false;  // Default to false
+
+    private String verificationToken;
+
+    @Column(nullable = true)
+    private LocalDateTime tokenExpiry;
+
+    public Users( String userName, String password, String email, String role, String verificationToken,LocalDateTime tokenExpiry) {
         this.userName = userName;
         this.password = password;
         this.email = email;
         this.role = role;
+        this.verificationToken = verificationToken;
+        this.tokenExpiry = tokenExpiry;
     }
+
+
 
     public Users() {
     }
+
+
     @PrePersist public void generateUniqueId() {
         long timestamp = Instant.now().toEpochMilli();
         this.uniqueId = (long) ((timestamp % 100000)+(Math.random()*1000));

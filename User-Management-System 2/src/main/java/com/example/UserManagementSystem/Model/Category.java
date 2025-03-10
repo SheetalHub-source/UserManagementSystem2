@@ -1,14 +1,10 @@
-package com.example.UserManagementSystem.entities;
+package com.example.UserManagementSystem.Model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.LocalDateTime;

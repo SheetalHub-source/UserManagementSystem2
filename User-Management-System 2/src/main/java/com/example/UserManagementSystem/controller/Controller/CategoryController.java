@@ -1,4 +1,4 @@
-package com.example.UserManagementSystem.controller;
+package com.example.UserManagementSystem.controller.Controller;
 
 import com.example.UserManagementSystem.dto.CategoryRequest;
 import com.example.UserManagementSystem.dto.CategoryResponse;

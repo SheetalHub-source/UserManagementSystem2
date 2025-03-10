@@ -1,6 +1,6 @@
 package com.example.UserManagementSystem.repository;
 
-import com.example.UserManagementSystem.entities.Users;
+import com.example.UserManagementSystem.Model.Users;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
@@ -16,4 +16,6 @@ public interface UserRepository extends JpaRepository<Users,Long>, JpaSpecificat
     boolean existsByEmail(String email);
 
     Optional<Users> findByEmail(String email);
+
+    Users findByVerificationToken(String token);
 }

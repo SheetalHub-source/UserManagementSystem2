@@ -2,12 +2,11 @@ package com.example.UserManagementSystem.service;
 
 import com.example.UserManagementSystem.ExceptionHandling.CustomValidationException;
 import com.example.UserManagementSystem.ExceptionHandling.ResourceNotFoundException;
-import com.example.UserManagementSystem.Specification.CategorySpecification;
 import com.example.UserManagementSystem.Specification.ProductSpecification;
 import com.example.UserManagementSystem.dto.*;
-import com.example.UserManagementSystem.entities.Category;
-import com.example.UserManagementSystem.entities.Product;
-import com.example.UserManagementSystem.entities.Variant;
+import com.example.UserManagementSystem.Model.Category;
+import com.example.UserManagementSystem.Model.Product;
+import com.example.UserManagementSystem.Model.Variant;
 import com.example.UserManagementSystem.repository.ProductRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;

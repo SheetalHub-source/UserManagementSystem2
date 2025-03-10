@@ -5,11 +5,8 @@ import com.example.UserManagementSystem.ExceptionHandling.ResourceNotFoundExcept
 import com.example.UserManagementSystem.Specification.CategorySpecification;
 import com.example.UserManagementSystem.dto.CategoryRequest;
 import com.example.UserManagementSystem.dto.CategoryResponse;
-import com.example.UserManagementSystem.dto.UserResponse;
-import com.example.UserManagementSystem.entities.Category;
-import com.example.UserManagementSystem.entities.Users;
+import com.example.UserManagementSystem.Model.Category;
 import com.example.UserManagementSystem.repository.CategoryRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -21,7 +18,6 @@ import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 
 @Service
 public class CategoryService {

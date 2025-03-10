@@ -2,16 +2,10 @@ package com.example.UserManagementSystem.controller.Controller;
 
 import com.example.UserManagementSystem.JWT.JwtUtils;
 import com.example.UserManagementSystem.Security.CustomUserDetailsService;
-import com.example.UserManagementSystem.dto.AuthRequest;
-import com.example.UserManagementSystem.dto.UserRequest;
-import com.example.UserManagementSystem.dto.UserResponse;
-import com.example.UserManagementSystem.entities.Users;
-import com.example.UserManagementSystem.repository.UserRepository;
-import com.example.UserManagementSystem.resultGenericClass.GenericResponse;
+import com.example.UserManagementSystem.Model.Users;
 import com.example.UserManagementSystem.service.UserService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,7 +15,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -47,18 +40,30 @@ public class AuthController {
                                                      @RequestParam String password,
                                                      HttpServletResponse response) {
         try {
-           log.info("Login Controller is called ..................................");
+            log.info("Login Controller is called ..................................");
+
             Users user = userService.findByEmail(username);
-            String role = user.getRole();
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Collections.singletonMap("error", "User not found"));
+            }
+
+            if (!user.isActive() && user.getRole().equalsIgnoreCase("USER")) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Collections.singletonMap("error", "Please verify your email before logging in."));
+            }
+
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
 
-            jwtUtil.generateTokenAndSetCookie(username,role,response);
+            String role = user.getRole();
+            String token = jwtUtil.generateTokenAndSetCookie(username, role, response);
 
-            System.out.println("User Role: ......................." + role);
+            log.info("User Role: {}", role);
+
             Map<String, String> responseBody = new HashMap<>();
             responseBody.put("message", "Login Successful");
             responseBody.put("role", role);
-            //responseBody.put(token)
+            responseBody.put("jwt", token);
 
             return ResponseEntity.ok(responseBody);
 
@@ -68,6 +73,12 @@ public class AuthController {
         }
     }
 
+
+    @GetMapping("/verify")
+    public String isverifyUser(@RequestParam("token") String token) {
+        String message = userService.verifyUser(token);
+        return "login";
+    }
     @GetMapping("/validate-token")
     @ResponseBody  // ✅ Ensures JSON response
     public ResponseEntity<Map<String, String>> validateToken(@CookieValue(value = "jwt", required = false) String token) {
@@ -110,23 +121,3 @@ public class AuthController {
         }
     }
 
- /* @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody AuthRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.username(), request.password()));
-
-        String token = jwtUtil.generateToken(request.username());
-        return ResponseEntity.ok(token);
-    }
-
-    @PostMapping("/signup")
-    @ResponseBody
-    public GenericResponse<UserResponse> createAdmin(@Valid @RequestBody UserRequest userRequest){
-        UserResponse userResponse =  userService.createAndUpdateUser(userRequest);
-        if(userRequest.uniqueId()==null) {
-            return GenericResponse.success(userResponse, userRequest.role().toUpperCase() + " created successfully");
-        }
-        else {
-            return GenericResponse.success(userResponse, userRequest.role().toUpperCase() + " updated successfully");
-        }
-    }*/
